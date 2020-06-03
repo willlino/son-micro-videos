@@ -9,7 +9,7 @@ use Illuminate\Http\Request;
 class GenreController extends Controller
 {
     private $rules = [
-        'name' => 'required|max:100',
+        'name' => 'required|max:255',
         'active' => 'boolean'
     ];
 
