@@ -89,8 +89,16 @@ class CategoryTest extends TestCase
         $category->delete();
         $categories = Category::all();
         $this->assertCount(0, $categories);
+        $this->assertNull(Category::find($category->id));
 
         $categories = Category::onlyTrashed()->get();
         $this->assertCount(1, $categories);
+
+        $category->restore();
+        $this->assertNotNull(Category::find($category->id));
+        $this->assertCount(1, $categories);
+
+        $categories = Category::onlyTrashed()->get();
+        $this->assertCount(0, $categories);
     }
 }

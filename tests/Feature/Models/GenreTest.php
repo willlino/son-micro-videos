@@ -68,4 +68,24 @@ class GenreTest extends TestCase
         }
         
     }
+
+    public function testDelete() {
+        $genre = factory(Genre::class, 1)->create()->first();
+        $genre->refresh();
+
+        $genre->delete();
+        $genres = Genre::all();
+        $this->assertCount(0, $genres);
+        $this->assertNull(Genre::find($genre->id));
+
+        $genres = Genre::onlyTrashed()->get();
+        $this->assertCount(1, $genres);
+
+        $genre->restore();
+        $this->assertNotNull(Genre::find($genre->id));
+        $this->assertCount(1, $genres);
+
+        $genres = Genre::onlyTrashed()->get();
+        $this->assertCount(0, $genres);
+    }
 }
