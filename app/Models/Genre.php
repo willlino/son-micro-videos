@@ -8,10 +8,11 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class Genre extends Model
 {
     use SoftDeletes, Traits\Uuid;
-    protected $fillable = ['name', "active"];
+    protected $fillable = ['name', 'active'];
     protected $dates = ['deleted_at'];
     protected $casts = [
-        'id' => 'string'
+        'id' => 'string',
+        'active' => 'boolean'
     ];
     public $incrementing = false;
 }
