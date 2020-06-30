@@ -25,7 +25,7 @@ services:
         networks:
             - app-network
         depends_on:
-            - micro-videos-app
+            - app
 
     db:
         image: mysql:5.7
