@@ -12,7 +12,7 @@ trait TestSaves
         if ($response->status() != 201)
             throw new \Exception("Response status must be 201, given {$response->status()}:\n {$response->content()}");
 
-        $this->assertDatabase($response, $testDatabase);
+        $this->assertInDatabase($response, $testDatabase);
         $this->assertJsonResponseContent($response, $testDatabase, $testJsonData);
         return $response;
     }
@@ -20,10 +20,10 @@ trait TestSaves
     protected function assertUpdate(array $sendData, array  $testDatabase, array  $testJsonData = null): TestResponse
     {
         $response = $this->json('PUT', $this->routeUpdate(), $sendData);
-        if ($response->status() != 201)
+        if ($response->status() != 200)
             throw new \Exception("Response status must be 200, given {$response->status()}:\n {$response->content()}");
 
-        $this->assertDatabase($response, $testDatabase);
+        $this->assertInDatabase($response, $testDatabase);
         $this->assertJsonResponseContent($response, $testDatabase, $testJsonData);
         return $response;
     }

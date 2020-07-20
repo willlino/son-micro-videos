@@ -89,7 +89,7 @@ class CategoryControllerTest extends TestCase
         ];
         $response = $this->assertUpdate($data, $data + ['deleted_at' => null]);
         $response->assertJsonStructure([
-            'created_at', 'udpated_at'
+            'created_at', 'updated_at'
         ]);
 
         $data = [
