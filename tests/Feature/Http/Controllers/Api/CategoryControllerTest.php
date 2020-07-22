@@ -78,10 +78,6 @@ class CategoryControllerTest extends TestCase
 
     public function testUpdate()
     {
-        $this->category = factory(Category::class)->create([
-            'description' => 'desc',
-            'active' => false
-        ]);
         $data = [
             'name' => 'test',
             'description' => 'test',

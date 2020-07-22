@@ -6,11 +6,16 @@ use App\Models\CastMember;
 
 class CastMemberController extends BasicCrudController
 {
-    private $rules = [
-        'name' => 'required|max:255',
-        'type' => 'required',
-        'active' => 'boolean'
-    ];
+    private $rules;
+
+    public function __construct()
+    {
+        $this->rules = [
+            'name' => 'required|max:255',
+            'type' => 'required|in:' . implode(',', [CastMember::TYPE_ACTOR, CastMember::TYPE_DIRECTOR]),
+            'active' => 'boolean'
+        ];
+    }
 
     public function model(){
         return CastMember::class;

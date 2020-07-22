@@ -40,18 +40,30 @@ class CastMemberControllerTest extends TestCase
     public function testInvalidationData()
     {
         $data = [
-            'name' => ''
+            'name' => '',
+            'type' => ''
         ];
         $this->assertInvalidationInStoreAction($data, 'required');
         $this->assertInvalidationInUpdateAction($data, 'required');
 
- 
         $data = [
             'name' => str_repeat('a', 256),
         ];
         $this->assertInvalidationInStoreAction($data, 'max.string', ['max' => 255]);
         $this->assertInvalidationInUpdateAction($data, 'max.string', ['max' => 255]);
-        
+
+        $data = [
+            'type' => 0,
+        ];
+        $this->assertInvalidationInStoreAction($data, 'in');
+        $this->assertInvalidationInUpdateAction($data, 'in');
+
+        $data = [
+            'type' => 's',
+        ];
+        $this->assertInvalidationInStoreAction($data, 'in');
+        $this->assertInvalidationInUpdateAction($data, 'in');
+
         $data = [
             'active' => 'a'
         ];
@@ -80,11 +92,6 @@ class CastMemberControllerTest extends TestCase
 
     public function testUpdate()
     {
-        $this->castMember = CastMember::create([
-            'name' => 'test_name',
-            'type' => CastMember::TYPE_ACTOR,
-            'active' => false
-        ]);
         $data = [
             'name' => 'test',
             'type' => CastMember::TYPE_DIRECTOR,
