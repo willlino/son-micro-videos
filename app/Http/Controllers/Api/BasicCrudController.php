@@ -9,10 +9,7 @@ abstract class BasicCrudController extends Controller
 {
     protected abstract function model();
     protected abstract function rulesStore();
-    private $rules = [
-        'name' => 'required|max:255',
-        'active' => 'boolean'
-    ];
+    protected abstract function rulesUpdate();
 
     public function index()
     {
@@ -21,32 +18,36 @@ abstract class BasicCrudController extends Controller
 
     public function store(Request $request)
     {
-        $this->validate($request, $this->rulesStore());
+        $validateData = $this->validate($request, $this->rulesStore());
+        $obj = $this->model()::create($validateData);
+        $obj->refresh();
+        return $obj;
     }
 
-    // public function store(Request $request)
-    // {
-    //     $this->validate($request, $this->rules);
-    //     $category = Category::create($request->all());
-    //     $category->refresh();
-    //     return $category;
-    // }
+    protected function findOrFail($id){
+        $model = $this->model();
+        $keyName = (new $model)->getRouteKeyName();
+        return $this->model()::where($keyName, $id)->firstOrFail();
+    }
 
-    // public function show(Category $category) // Route model binding
-    // {
-    //     return $category;
-    // }
+    public function show($id)
+    {
+        $obj = $this->findOrFail($id);
+        return $obj;
+    }
 
-    // public function update(Request $request, Category $category)
-    // {
-    //     $this->validate($request, $this->rules);
-    //     $category->update($request->all());
-    //     return $category;
-    // }
+    public function update(Request $request, $id)
+    {
+        $obj = $this->findOrFail($id);
+        $validateData = $this->validate($request, $this->rulesUpdate());
+        $obj->update($validateData);
+        return $obj;
+    }
 
-    // public function destroy(Category $category)
-    // {
-    //     $category->delete();
-    //     return response()->noContent();
-    // }
+    public function destroy($id)
+    {
+        $obj = $this->findOrFail($id);
+        $obj->delete();
+        return response()->noContent();
+    }
 }
