@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Models\Video;
+use Illuminate\Http\Request;
 
 class VideoController extends BasicCrudController
 {
@@ -16,19 +17,59 @@ class VideoController extends BasicCrudController
             'year_launched' => 'required|date_format:Y',
             'opened' => 'boolean',
             'rating' => 'required|in:' . implode(',', Video::RATING_LIST),
-            'duration' => 'required|integer'
+            'duration' => 'required|integer',
+            'categories_id' => 'required|array|exists:categories,id',
+            'genres_id' => 'required|array|exists:genres,id'
         ];
     }
 
-    public function model(){
+    public function store(Request $request)
+    {
+        $validateData = $this->validate($request, $this->rulesStore());
+        $self = $this;
+        $obj = \DB::transaction(function () use ($request, $validateData, $self) {
+            $obj = $this->model()::create($validateData);
+            $self->handleRelations($obj, $request);
+            return $obj;
+        });
+
+        $obj->refresh();
+        return $obj;
+    }
+
+    public function update(Request $request, $id)
+    {
+        $obj = $this->findOrFail($id);
+        $validateData = $this->validate($request, $this->rulesUpdate());
+
+        $self = $this;
+        $obj = \DB::transaction(function () use ($request, $validateData, $self, $obj) {
+            $obj->update($validateData);
+            $self->handleRelations($obj, $request);
+            return $obj;
+        });
+        
+        return $obj;
+    }
+
+    protected function handleRelations($video, $request)
+    {
+        $video->categories()->sync($request->get('categories_id'));
+        $video->genres()->sync($request->get('genres_id'));
+    }
+
+    public function model()
+    {
         return Video::class;
     }
 
-    public function rulesStore(){
+    public function rulesStore()
+    {
         return $this->rules;
     }
 
-    public function rulesUpdate(){
+    public function rulesUpdate()
+    {
         return $this->rules;
     }
 }
