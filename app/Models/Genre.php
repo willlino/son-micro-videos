@@ -15,4 +15,9 @@ class Genre extends Model
         'active' => 'boolean'
     ];
     public $incrementing = false;
+
+    public function categories()
+    {
+        return $this->belongsToMany(Category::class)->withTrashed(); 
+    }
 }

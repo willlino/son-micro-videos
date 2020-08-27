@@ -1,0 +1,7 @@
+{
+    "sync.autoDownload": true,
+    "sync.autoUpload": true,
+    "sync.forceUpload": true,
+    "sync.forceDownload": true,
+    "better-phpunit.phpunitBinary": "/workpace/vendor/bin/phpunit"
+}
