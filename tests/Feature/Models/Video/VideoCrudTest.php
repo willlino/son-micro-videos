@@ -20,12 +20,13 @@ class VideoCrudTest extends BaseVideoTestCase
 
     public function testList()
     {
-        factory(Video::class, 1)->create();
+        $video = factory(Video::class, 1)->create()->first();
+        $video->refresh();
         $videos = Video::all();
         $this->assertCount(1, $videos);
         $videoKey = array_keys($videos->first()->getAttributes());
         $this->assertEqualsCanonicalizing([
-            'id', 'title', 'description', 'video_file', 'year_launched',
+            'id', 'title', 'description', 'video_file', 'year_launched', 'thumb_file',
             'opened', 'rating', 'duration', 'created_at', 'updated_at', 'deleted_at'
         ], $videoKey);
     }
