@@ -4,11 +4,11 @@ steps:
     args: 
       - kms 
       - decrypt 
-      - ciphertext-file=./storage/credentials/google/service-account-storage.json.enc 
-      - plaintext-file=./storage/credentials/google/service-account-storage.json 
-      - location=global 
-      - keyring=testing-lesson 
-      - key=service-account
+      - --ciphertext-file=./storage/credentials/google/service-account-storage.json.enc 
+      - --plaintext-file=./storage/credentials/google/service-account-storage.json 
+      - --location=global 
+      - --keyring=testing-lesson 
+      - --key=service-account
 
   - id: "Rodando docker-compose"
     name: 'gcr.io/$PROJECT_ID/docker-compose:1.24.0'
