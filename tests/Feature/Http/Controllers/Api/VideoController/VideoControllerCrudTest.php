@@ -8,7 +8,7 @@ use App\Models\Video;
 use Tests\Traits\TestSaves;
 use Tests\Traits\TestValidations;
 
-class VideoControllerTest extends BaseVideoControllerTestCase
+class VideoControllerCrudTest extends BaseVideoControllerTestCase
 {
     use TestValidations, TestSaves;
 

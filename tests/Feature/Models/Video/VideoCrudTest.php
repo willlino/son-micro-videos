@@ -26,8 +26,8 @@ class VideoCrudTest extends BaseVideoTestCase
         $this->assertCount(1, $videos);
         $videoKey = array_keys($videos->first()->getAttributes());
         $this->assertEqualsCanonicalizing([
-            'id', 'title', 'description', 'video_file', 'year_launched', 'thumb_file',
-            'opened', 'rating', 'duration', 'created_at', 'updated_at', 'deleted_at'
+            'id', 'title', 'description', 'video_file', 'thumb_file', 'trailer_file', 'banner_file', 
+            'year_launched', 'opened', 'rating', 'duration', 'created_at', 'updated_at', 'deleted_at'
         ], $videoKey);
     }
 
