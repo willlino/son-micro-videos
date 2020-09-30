@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Http\Controllers\Api\VideoController;
 
+use Illuminate\Foundation\Testing\DatabaseMigrations;
 use App\Models\Category;
 use App\Models\Genre;
 use App\Models\Video;
@@ -10,7 +11,7 @@ use Tests\Traits\TestValidations;
 
 class VideoControllerCrudTest extends BaseVideoControllerTestCase
 {
-    use TestValidations, TestSaves;
+    use DatabaseMigrations, TestValidations, TestSaves;
 
     public function testIndex()
     {
@@ -139,6 +140,9 @@ class VideoControllerCrudTest extends BaseVideoControllerTestCase
         $category = factory(Category::class)->create();
         $genre = factory(Genre::class)->create();
         $genre->categories()->sync($category->id);
+
+        $this->sendData = \Arr::except($this->sendData, ['categories_id', 'genres_id']);
+        
         $data = [
             [
                 'send_data' => $this->sendData + [
@@ -189,6 +193,8 @@ class VideoControllerCrudTest extends BaseVideoControllerTestCase
         $genre->categories()->sync($categoriesId);
         $genreId = $genre->id;
 
+        $this->sendData = \Arr::except($this->sendData, ['categories_id', 'genres_id']);
+
         $response = $this->json(
             'POST',
             $this->routeStore(),
@@ -233,6 +239,8 @@ class VideoControllerCrudTest extends BaseVideoControllerTestCase
         $genres->each(function ($genre) use ($categoryId) {
             $genre->categories()->sync($categoryId);
         });
+
+        $this->sendData = \Arr::except($this->sendData, ['categories_id', 'genres_id']);
 
         $response = $this->json(
             'POST',

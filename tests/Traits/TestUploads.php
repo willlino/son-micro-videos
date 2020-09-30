@@ -40,7 +40,7 @@ trait TestUploads
     {
         /** @var UploadeFiles $model */
         foreach ($files as $file) {
-            \Storage::assertExists($model->relativeFilePath($file->hasName()));
+            \Storage::assertExists($model->relativeFilePath($file->hashName()));
         }
     }
 }

@@ -164,8 +164,8 @@ class VideoControllerUploadsTest extends BaseVideoControllerTestCase
 
         $id = $response->json('id');
         $video = Video::find($id);
-        $thumbFilePath = $video->relativeFilePath([$files['thumb_file']->hashName()]);
-        $videoFilePath = $video->relativeFilePath([$files['video_file']->hashName()]);
+        $thumbFilePath = $video->relativeFilePath($files['thumb_file']->hashName());
+        $videoFilePath = $video->relativeFilePath($files['video_file']->hashName());
         \Storage::assertMissing($thumbFilePath);
         \Storage::assertMissing($videoFilePath);
     }
@@ -181,7 +181,7 @@ class VideoControllerUploadsTest extends BaseVideoControllerTestCase
         return [
             'thumb_file' => UploadedFile::fake()->create('thumb_file.jpg'),
             'banner_file' => UploadedFile::fake()->create('banner_file.jpg'),
-            'trailer_file' => UploadedFile::fake()->create('trailer_file.jpg'),
+            'trailer_file' => UploadedFile::fake()->create('trailer_file.mp4'),
             'video_file' => UploadedFile::fake()->create('video_file.mp4')
         ];
     }
