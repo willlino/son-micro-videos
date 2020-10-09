@@ -3,7 +3,6 @@
 namespace App\Models;
 
 use App\Models\Traits\UploadFiles;
-use Exception;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
