@@ -7,7 +7,7 @@
             "request": "launch",
             "port": 9001,
             "pathMappings": {
-                "/var/www": "${workspaceFolder}"
+                "/var/www/backend": "${workspaceFolder}/backend"
             },
             "xdebugSettings": {
                 "max_data": 65535,
