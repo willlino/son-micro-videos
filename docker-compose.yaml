@@ -7,9 +7,14 @@ services:
         container_name: micro-videos-app
         environment:
             XDEBUG_CONFIG: remote_host=app remote_port=9001 remote_enable=1 xdebug.remote_autostart=1 remote_handler=dbgp xdebug.remote_log=/var/log/xdebug.log idekey=VSCODE
-        entrypoint: dockerize  -wait tcp://db:3306 -timeout 180s ./.docker/entrypoint.sh
+            CHOKIDAR_USEPOLLING: "true"
+        entrypoint: dockerize  -wait tcp://db:3306 -timeout 1000s ./.docker/entrypoint.sh
         volumes:
             - .:/var/www
+        ports:
+            - "3000:3000"
+            - "35729:35729"
+            - "9001:9001"
         networks:
             - app-network
         depends_on:

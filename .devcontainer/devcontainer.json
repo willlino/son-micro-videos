@@ -28,7 +28,10 @@
 	"extensions": [
 		"bmewburn.vscode-intelephense-client",
 		"calebporzio.better-phpunit",
-		"felixfbecker.php-debug"
+		"felixfbecker.php-debug",
+		"dbaeumer.vscode-eslint",
+		"ms-vscode.vscode-typescript-tslint-plugin",
+		"xabikos.reactsnippets"
 	]
 
 	// Use 'forwardPorts' to make a list of ports inside the container available locally.
