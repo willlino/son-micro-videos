@@ -31,7 +31,8 @@
 		"felixfbecker.php-debug",
 		"dbaeumer.vscode-eslint",
 		"ms-vscode.vscode-typescript-tslint-plugin",
-		"xabikos.reactsnippets"
+		"xabikos.reactsnippets",
+		"burkeholland.simple-react-snippets"
 	]
 
 	// Use 'forwardPorts' to make a list of ports inside the container available locally.
