@@ -10,8 +10,7 @@ import { Link as RouterLink } from "react-router-dom";
 import { Location } from "history";
 import routes from "../routes";
 import RouteParser from "route-parser";
-import { Container } from "@material-ui/core";
-
+import { Container, Box } from "@material-ui/core";
 
 const breadcrumbNameMap: { [key: string]: string } = {};
 routes.forEach(
@@ -23,12 +22,11 @@ const useStyles = makeStyles((theme: Theme) =>
     linkRouter: {
       color: "#4db5ab",
       "&:focus, &:active": {
-        color: "#4db5ab"  
+        color: "#4db5ab",
       },
       "&:hover": {
-        color: "#055a52"
-      }
-
+        color: "#055a52",
+      },
     },
   })
 );
@@ -57,11 +55,11 @@ export default function Breadcrumbs() {
             .slice(0, index + 1)
             .join("/")
             .replace("//", "/")}`;
-          const route = Object.keys(breadcrumbNameMap)
-          .find(path => new RouteParser(path)
-          .match(to));
+          const route = Object.keys(breadcrumbNameMap).find((path) =>
+            new RouteParser(path).match(to)
+          );
 
-          if(route == undefined){
+          if (route == undefined) {
             return false;
           }
 
@@ -70,7 +68,12 @@ export default function Breadcrumbs() {
               {breadcrumbNameMap[route]}
             </Typography>
           ) : (
-            <LinkRouter color="inherit" to={to} key={to} className={classes.linkRouter}>
+            <LinkRouter
+              color="inherit"
+              to={to}
+              key={to}
+              className={classes.linkRouter}
+            >
               {breadcrumbNameMap[route]}
             </LinkRouter>
           );
@@ -81,9 +84,11 @@ export default function Breadcrumbs() {
 
   return (
     <Container>
-      <Route>
-        {({ location }: { location: Location }) => makeBreadcrumb(location)}
-      </Route>
+      <Box paddingBottom={2}>
+        <Route>
+          {({ location }: { location: Location }) => makeBreadcrumb(location)}
+        </Route>
+      </Box>
     </Container>
   );
 }
