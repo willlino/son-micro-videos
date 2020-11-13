@@ -214,6 +214,32 @@
     ),
     'prefix' => 'laravel_cache',
   ),
+  'cors' => 
+  array (
+    'paths' => 
+    array (
+      0 => 'api/*',
+    ),
+    'allowed_methods' => 
+    array (
+      0 => '*',
+    ),
+    'allowed_origins' => 
+    array (
+    ),
+    'allowed_origins_patterns' => 
+    array (
+    ),
+    'allowed_headers' => 
+    array (
+      0 => '*',
+    ),
+    'exposed_headers' => 
+    array (
+    ),
+    'max_age' => 0,
+    'supports_credentials' => false,
+  ),
   'database' => 
   array (
     'default' => 'mysql',
@@ -560,6 +586,7 @@
     'include_fluent' => false,
     'include_factory_builders' => false,
     'write_model_magic_where' => true,
+    'write_model_relation_count_properties' => true,
     'write_eloquent_model_mixins' => false,
     'include_helpers' => false,
     'helper_files' => 
@@ -601,6 +628,7 @@
       'boolean' => 'bool',
     ),
     'include_class_docblocks' => false,
+    'force_fqn' => false,
   ),
   'debug-server' => 
   array (
@@ -629,6 +657,7 @@
     'register_commands' => false,
     'ignored_solution_providers' => 
     array (
+      0 => 'Facade\\Ignition\\SolutionProviders\\MissingPackageSolutionProvider',
     ),
     'enable_runnable_solutions' => NULL,
     'remote_sites_path' => '',

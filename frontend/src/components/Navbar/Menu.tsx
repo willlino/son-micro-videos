@@ -5,7 +5,7 @@ import routes, { MyRouteProps } from "../../routes";
 import { Link } from "react-router-dom";
 
 export const Menu = () => {
-  const listRoutes = ["dashboard", "categories.list"];
+  const listRoutes = ["dashboard", "categories.list", "genres.list", "cast_members.list"];
   const menuRoutes = routes.filter((route) => listRoutes.includes(route.name));
   const [anchorEl, setAnchorEl] = React.useState(null);
   const open = Boolean(anchorEl);
