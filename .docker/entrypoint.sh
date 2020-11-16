@@ -4,16 +4,20 @@
 
 # FRONT-END
 npm config set cache /var/www/.npm-cache --global
-cd /var/www/frontend && npm install && cd ..
+cd /var/www/frontend && npm install && 
+
+cp .env.example .env
+
+cd ..
 
 # BACK-END
 cd backend
-if [ ! -f ".env"]; then
+# if [ ! -f '.env']; then
   cp .env.example .env
-fi
-if [ ! -f ".env.testing"]; then
+# fi
+# if [ ! -f '.env.testing']; then
   cp .env.testing.example .env.testing
-fi
+# fi
 
 composer install
 php artisan key:generate
