@@ -56,7 +56,7 @@ const Table = (props: Props) => {
   return (
     <div>
       <MUIDataTable
-        title="Listagem de gêneros"
+        title=""
         columns={columnsDefinition}
         data={data}
       />

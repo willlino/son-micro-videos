@@ -57,11 +57,17 @@ export const Form = () => {
             <Checkbox 
               name="active"
               inputRef={register}
+              color={"primary"}
               defaultChecked
             />
             Ativo?
             <Box dir={"rtl"}>
-              <Button {...buttonProps} onClick={() => onSubmit(getValues(), null)}>Salvar</Button>
+              <Button 
+                {...buttonProps}
+                variant={"contained"} 
+                color={"primary"}
+                onClick={() => onSubmit(getValues(), null)}
+              >Salvar</Button>
               <Button {...buttonProps} type="submit">Salvar e continuar editando</Button>  
             </Box>
         </form>
