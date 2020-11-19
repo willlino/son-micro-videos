@@ -26,16 +26,17 @@ export const Form = () => {
   const classes = useStyles();
 
   const { register, handleSubmit, getValues, setValue, watch } = useForm({
-      defaultValues: {
-          categories_id : []
-      }
+    defaultValues: {
+      categories_id: [],
+    },
   });
   const [categories, setCategories] = useState<any[]>([]);
   const category = getValues()["categories_id"];
 
   const buttonProps: ButtonProps = {
     className: classes.submit,
-    variant: "outlined",
+    color: "secondary",
+    variant: "contained",
   };
 
   useEffect(() => {
