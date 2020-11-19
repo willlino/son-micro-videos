@@ -1,4 +1,5 @@
 import { createMuiTheme } from "@material-ui/core";
+import { green, red } from "@material-ui/core/colors";
 import {
   PaletteOptions,
   SimplePaletteColorOptions,
@@ -12,10 +13,18 @@ const palette: PaletteOptions = {
   secondary: {
     main: "#4db5ad",
     contrastText: "#fff",
+    dark: "#055a52"
   },
   background: {
     default: "#fafafa",
   },
+  success: {
+    main: green[500],
+    contrastText: "#fff"
+  },
+  error: {
+    main: red[500]
+  }
 };
 
 const theme = createMuiTheme({
@@ -34,13 +43,13 @@ const theme = createMuiTheme({
       icon: {
         color: (palette!.primary! as SimplePaletteColorOptions).main,
         "&:hover, &:active, &.focus": {
-          color: "#055a52",
+          color: (palette!.secondary! as SimplePaletteColorOptions).dark,
         },
       },
       iconActive: {
-        color: "#055a52",
+        color: (palette!.secondary! as SimplePaletteColorOptions).dark,
         "&:hover, &:active, &.focus": {
-          color: "#055a52",
+          color: (palette!.secondary! as SimplePaletteColorOptions).dark,
         },
       },
     },
