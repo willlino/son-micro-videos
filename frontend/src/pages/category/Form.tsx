@@ -11,11 +11,10 @@ import {
 import { ButtonProps } from "@material-ui/core/Button";
 import { useForm } from "react-hook-form";
 import categoryHttp from "../../util/http/category-http";
-import { yupResolver } from '@hookform/resolvers/yup';
+import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "../../util/vendor/yup";
-import { useParams } from "react-router-dom";
+import { useHistory, useParams } from "react-router-dom";
 import { useState, useEffect } from "react";
-
 
 const useStyles = makeStyles((theme: Theme) => {
   return {
@@ -26,55 +25,77 @@ const useStyles = makeStyles((theme: Theme) => {
 });
 
 const validationSchema = yup.object().shape({
-  name: yup.string()
-    .label("Nome")
-    .required()
-    .max(255)
+  name: yup.string().label("Nome").required().max(255),
 });
 
 export const Form = () => {
-
   const classes = useStyles();
 
-  const { register, handleSubmit, getValues, errors, reset, watch, setValue } = useForm<{name, active}>({
+  const {
+    register,
+    handleSubmit,
+    getValues,
+    errors,
+    reset,
+    watch,
+    setValue,
+  } = useForm<{ name; active }>({
     resolver: yupResolver(validationSchema),
     defaultValues: {
       active: true,
     },
   });
 
-  const {id} = useParams();
-  const [category, setCategory] = useState(null);
-  
+  const history = useHistory();
+  const { id } = useParams();
+  const [category, setCategory] = useState<{ id: string } | null>(null);
+  const [loading, setLoading] = useState<boolean>(false);
+
   useEffect(() => {
-    register({name: 'active'})
+    register({ name: "active" });
   }, [register]);
 
   useEffect(() => {
-    if (!id){
+    if (!id) {
       return;
     }
 
-    categoryHttp.get(id).then(({data}) => {
-      setCategory(data.data);
-      reset(data.data);
-    });
+    setLoading(true);
+    categoryHttp
+      .get(id)
+      .then(({ data }) => {
+        setCategory(data.data);
+        reset(data.data);
+      })
+      .finally(() => setLoading(false));
   }, []);
 
-  function onSubmit(formData, event) { 
-    const http = !id
+  function onSubmit(formData, event) {
+    const http = !category
       ? categoryHttp.create(formData)
-      : categoryHttp.update(id, formData);
+      : categoryHttp.update(category.id, formData);
 
-    http.then((response) => {
-      console.log(response);
-    });
+    setLoading(true);
+    http
+      .then(({data}) => {
+        setTimeout(() => {
+          event 
+          ? (
+            id 
+            ? history.replace(`/categories/${data.data.id}/edit`)
+            : history.push(`/categories/${data.data.id}/edit`)
+  
+          ) : history.push(`/categories`);
+        });
+      })
+      .finally(() => setLoading(false));
   }
 
   const buttonProps: ButtonProps = {
     className: classes.submit,
     color: "secondary",
     variant: "contained",
+    disabled: loading
   };
 
   return (
@@ -85,9 +106,10 @@ export const Form = () => {
         fullWidth
         variant={"outlined"}
         inputRef={register}
+        disabled={loading}
         error={errors.name !== undefined}
         helperText={errors.name && errors.name.message}
-        InputLabelProps={{shrink: true}}
+        InputLabelProps={{ shrink: true }}
       />
       <TextField
         name="description"
@@ -98,19 +120,21 @@ export const Form = () => {
         variant={"outlined"}
         margin={"normal"}
         inputRef={register}
-        InputLabelProps={{shrink: true}}
+        disabled={loading}
+        InputLabelProps={{ shrink: true }}
       />
       <FormControlLabel
         control={
           <Checkbox
             name="active"
             color={"primary"}
-            onChange={ () => setValue('active', !getValues()['active']) }
-            checked={watch('active')}
+            onChange={() => setValue("active", !getValues()["active"])}
+            checked={watch("active")}
           />
         }
         label={"Ativo?"}
         labelPlacement={"end"}
+        disabled={loading}
       />
       <Box dir={"rtl"}>
         <Button {...buttonProps} onClick={() => onSubmit(getValues(), null)}>
