@@ -53,6 +53,13 @@ export const Form = () => {
   const [category, setCategory] = useState<{ id: string } | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
 
+  const buttonProps: ButtonProps = {
+    className: classes.submit,
+    color: "secondary",
+    variant: "contained",
+    disabled: loading,
+  };
+
   useEffect(() => {
     register({ name: "active" });
   }, [register]);
@@ -62,48 +69,54 @@ export const Form = () => {
       return;
     }
 
-    setLoading(true);
-    categoryHttp
-      .get(id)
-      .then(({ data }) => {
+    async function getCategory() {
+      setLoading(true);
+
+      try {
+        const { data } = await categoryHttp.get(id);
         setCategory(data.data);
         reset(data.data);
-      })
-      .finally(() => setLoading(false));
+      } catch (error) {
+        console.log(error);
+        snackbar.enqueueSnackbar("Não foi possível carregar as informações", {
+          variant: "error",
+        });
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    getCategory();
   }, []);
 
-  function onSubmit(formData, event) {
-    const http = !category
-      ? categoryHttp.create(formData)
-      : categoryHttp.update(category.id, formData);
-
+  async function onSubmit(formData, event) {
     setLoading(true);
-    http
-      .then(({data}) => {
-        snackbar.enqueueSnackbar('Categoria salva com sucesso!', {variant: "success"});
-        setTimeout(() => {
-          event 
-          ? (
-            id 
+    
+    try {
+      const http = !category
+        ? categoryHttp.create(formData)
+        : categoryHttp.update(category.id, formData);
+
+      const { data } = await http;
+      snackbar.enqueueSnackbar("Categoria salva com sucesso!", {
+        variant: "success",
+      });
+      setTimeout(() => {
+        event
+          ? id
             ? history.replace(`/categories/${data.data.id}/edit`)
             : history.push(`/categories/${data.data.id}/edit`)
-  
-          ) : history.push(`/categories`);
-        });
-      })
-      .catch((error) => {
-        console.log(error);
-        snackbar.enqueueSnackbar('Não foi possível salvar a categoria', {variant: "error"})
-      })
-      .finally(() => setLoading(false));
+          : history.push(`/categories`);
+      });
+    } catch (error) {
+      console.log(error);
+      snackbar.enqueueSnackbar("Não foi possível salvar a categoria", {
+        variant: "error",
+      });
+    } finally {
+      setLoading(false);
+    }
   }
-
-  const buttonProps: ButtonProps = {
-    className: classes.submit,
-    color: "secondary",
-    variant: "contained",
-    disabled: loading
-  };
 
   return (
     <form onSubmit={handleSubmit(onSubmit)}>

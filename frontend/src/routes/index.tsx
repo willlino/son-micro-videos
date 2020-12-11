@@ -3,9 +3,9 @@ import Dashboard from "../pages/Dashboard";
 import CategoryList from "../pages/category/PageList";
 import CategoryForm from "../pages/category/PageForm";
 import GenreList from "../pages/genre/PageList";
-import GenreCreate from "../pages/genre/PageForm";
+import GenreForm from "../pages/genre/PageForm";
 import CastMemberList from "../pages/cast-member/PageList";
-import CastMemberCreate from "../pages/cast-member/PageForm";
+import CastMemberForm from "../pages/cast-member/PageForm";
 
 
 export interface MyRouteProps extends RouteProps {
@@ -43,13 +43,6 @@ const routes: MyRouteProps[] = [
         exact: true
     },
     {
-        name: 'categories.edit',
-        label: 'Editar Categorias',
-        path: '/categories/:id/edit',
-        component: CategoryList,
-        exact: true
-    },
-    {
         name: 'genres.list',
         label: 'Listar Gêneros',
         path: '/genres',
@@ -60,7 +53,14 @@ const routes: MyRouteProps[] = [
         name: 'genres.create',
         label: 'Criar Gênero',
         path: '/genres/create',
-        component: GenreCreate,
+        component: GenreForm,
+        exact: true
+    },
+    {
+        name: 'genres.edit',
+        label: 'Editar Gênero',
+        path: '/genres/:id/edit',
+        component: GenreForm,
         exact: true
     },
     {
@@ -74,7 +74,14 @@ const routes: MyRouteProps[] = [
         name: 'cast_members.create',
         label: 'Criar Membro de Elenco',
         path: '/cast-members/create',
-        component: CastMemberCreate,
+        component: CastMemberForm,
+        exact: true
+    },
+    {
+        name: 'cast_members.edit',
+        label: 'Editar Membro de Elenco',
+        path: '/cast-members/:id/edit',
+        component: CastMemberForm,
         exact: true
     }
 ];
