@@ -12,7 +12,6 @@ import {
   Radio,
   FormControlLabel,
 } from "@material-ui/core";
-import { ButtonProps } from "@material-ui/core/Button";
 import { useForm } from "react-hook-form";
 import castMemberHttp from "../../util/http/cast-member-http";
 import { useEffect, useState } from "react";
@@ -21,14 +20,8 @@ import * as yup from "../../util/vendor/yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useSnackbar } from "notistack";
 import { FormHelperText } from "@material-ui/core";
-
-const useStyles = makeStyles((theme: Theme) => {
-  return {
-    submit: {
-      margin: theme.spacing(1),
-    },
-  };
-});
+import { CastMember } from "../../util/models";
+import SubmitActions from "../../components/SubmitActions";
 
 const validationSchema = yup.object().shape({
   name: yup.string().label("Nome").required().max(255),
@@ -36,8 +29,6 @@ const validationSchema = yup.object().shape({
 });
 
 export const Form = () => {
-  const classes = useStyles();
-
   const {
     register,
     handleSubmit,
@@ -46,6 +37,7 @@ export const Form = () => {
     errors,
     reset,
     watch,
+    trigger,
   } = useForm({
     resolver: yupResolver(validationSchema),
   });
@@ -53,14 +45,8 @@ export const Form = () => {
   const snackbar = useSnackbar();
   const history = useHistory();
   const { id } = useParams();
-  const [castMember, setCastMember] = useState<{ id: string } | null>(null);
+  const [castMember, setCastMember] = useState<CastMember | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
-
-  const buttonProps: ButtonProps = {
-    className: classes.submit,
-    color: "secondary",
-    variant: "contained",
-  };
 
   useEffect(() => {
     register({ name: "type" });
@@ -151,7 +137,7 @@ export const Form = () => {
           onChange={(e) => {
             setValue("type", parseInt(e.target.value));
           }}
-          value={watch('type') + ''}
+          value={watch("type") + ""}
         >
           <FormControlLabel
             value="1"
@@ -164,22 +150,20 @@ export const Form = () => {
             label="Ator"
           />
         </RadioGroup>
-        {
-          errors.type &&
-            <FormHelperText id="type-helper-text">
-              {errors.type.message}
-            </FormHelperText>
-        }
+        {errors.type && (
+          <FormHelperText id="type-helper-text">
+            {errors.type.message}
+          </FormHelperText>
+        )}
       </FormControl>
 
-      <Box dir={"rtl"}>
-        <Button {...buttonProps} onClick={() => onSubmit(getValues(), null)}>
-          Salvar
-        </Button>
-        <Button {...buttonProps} type="submit">
-          Salvar e continuar editando
-        </Button>
-      </Box>
+      <SubmitActions
+        disabledButtons={loading}
+        handleSave={async () => {
+          let isValid: boolean = await trigger();
+          if (isValid) onSubmit(getValues(), null);
+        }}
+      ></SubmitActions>
     </form>
   );
 };

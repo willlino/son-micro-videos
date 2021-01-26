@@ -7,8 +7,8 @@ import {
   makeStyles,
   Theme,
   FormControlLabel,
+  Grid,
 } from "@material-ui/core";
-import { ButtonProps } from "@material-ui/core/Button";
 import { useForm } from "react-hook-form";
 import categoryHttp from "../../util/http/category-http";
 import { yupResolver } from "@hookform/resolvers/yup";
@@ -16,22 +16,15 @@ import * as yup from "../../util/vendor/yup";
 import { useHistory, useParams } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { useSnackbar } from "notistack";
-
-const useStyles = makeStyles((theme: Theme) => {
-  return {
-    submit: {
-      margin: theme.spacing(1),
-    },
-  };
-});
+import { Category } from "../../util/models";
+import SubmitActions from "../../components/SubmitActions";
+import { DefaultForm } from "../../components/DefaultForm";
 
 const validationSchema = yup.object().shape({
   name: yup.string().label("Nome").required().max(255),
 });
 
 export const Form = () => {
-  const classes = useStyles();
-
   const {
     register,
     handleSubmit,
@@ -40,6 +33,7 @@ export const Form = () => {
     reset,
     watch,
     setValue,
+    trigger,
   } = useForm<{ name; active }>({
     resolver: yupResolver(validationSchema),
     defaultValues: {
@@ -50,15 +44,8 @@ export const Form = () => {
   const snackbar = useSnackbar();
   const history = useHistory();
   const { id } = useParams();
-  const [category, setCategory] = useState<{ id: string } | null>(null);
+  const [category, setCategory] = useState<Category | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
-
-  const buttonProps: ButtonProps = {
-    className: classes.submit,
-    color: "secondary",
-    variant: "contained",
-    disabled: loading,
-  };
 
   useEffect(() => {
     register({ name: "active" });
@@ -91,7 +78,7 @@ export const Form = () => {
 
   async function onSubmit(formData, event) {
     setLoading(true);
-    
+
     try {
       const http = !category
         ? categoryHttp.create(formData)
@@ -119,51 +106,50 @@ export const Form = () => {
   }
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)}>
-      <TextField
-        name="name"
-        label="Nome"
-        fullWidth
-        variant={"outlined"}
-        inputRef={register}
-        disabled={loading}
-        error={errors.name !== undefined}
-        helperText={errors.name && errors.name.message}
-        InputLabelProps={{ shrink: true }}
-      />
-      <TextField
-        name="description"
-        label="Descrição"
-        multiline
-        rows="4"
-        fullWidth
-        variant={"outlined"}
-        margin={"normal"}
-        inputRef={register}
-        disabled={loading}
-        InputLabelProps={{ shrink: true }}
-      />
-      <FormControlLabel
-        control={
-          <Checkbox
-            name="active"
-            color={"primary"}
-            onChange={() => setValue("active", !getValues()["active"])}
-            checked={watch("active")}
+    <DefaultForm GridItemProps={{xs:12, md:6}} onSubmit={handleSubmit(onSubmit)} >
+          <TextField
+            name="name"
+            label="Nome"
+            fullWidth
+            variant={"outlined"}
+            inputRef={register}
+            disabled={loading}
+            error={errors.name !== undefined}
+            helperText={errors.name && errors.name.message}
+            InputLabelProps={{ shrink: true }}
           />
-        }
-        label={"Ativo?"}
-        labelPlacement={"end"}
-        disabled={loading}
-      />
-      <Box dir={"rtl"}>
-        <Button {...buttonProps} onClick={() => onSubmit(getValues(), null)}>
-          Salvar
-        </Button>
-        <Button {...buttonProps} type="submit">
-          Salvar e continuar editando
-        </Button>
-      </Box>
-    </form>
+          <TextField
+            name="description"
+            label="Descrição"
+            multiline
+            rows="4"
+            fullWidth
+            variant={"outlined"}
+            margin={"normal"}
+            inputRef={register}
+            disabled={loading}
+            InputLabelProps={{ shrink: true }}
+          />
+          <FormControlLabel
+            control={
+              <Checkbox
+                name="active"
+                color={"primary"}
+                onChange={() => setValue("active", !getValues()["active"])}
+                checked={watch("active")}
+              />
+            }
+            label={"Ativo?"}
+            labelPlacement={"end"}
+            disabled={loading}
+          />
+          <SubmitActions
+            disabledButtons={loading}
+            handleSave={async () => {
+              let isValid: boolean = await trigger();
+              if (isValid) onSubmit(getValues(), null);
+            }}
+          ></SubmitActions>
+       </DefaultForm>
   );
 };

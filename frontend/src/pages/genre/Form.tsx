@@ -8,7 +8,6 @@ import {
   Theme,
   MenuItem,
 } from "@material-ui/core";
-import { ButtonProps } from "@material-ui/core/Button";
 import { useForm } from "react-hook-form";
 import genreHttp from "../../util/http/genre-http";
 import { useEffect, useState } from "react";
@@ -17,14 +16,8 @@ import * as yup from "../../util/vendor/yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useSnackbar } from "notistack";
 import { useHistory, useParams } from "react-router-dom";
-
-const useStyles = makeStyles((theme: Theme) => {
-  return {
-    submit: {
-      margin: theme.spacing(1),
-    },
-  };
-});
+import { Category, Genre } from "../../util/models";
+import SubmitActions from "../../components/SubmitActions";
 
 const validationSchema = yup.object().shape({
   name: yup.string().label("Nome").required().max(255),
@@ -32,7 +25,6 @@ const validationSchema = yup.object().shape({
 });
 
 export const Form = () => {
-  const classes = useStyles();
 
   const {
     register,
@@ -42,6 +34,7 @@ export const Form = () => {
     watch,
     errors,
     reset,
+    trigger
   } = useForm({
     resolver: yupResolver(validationSchema),
     defaultValues: {
@@ -53,23 +46,18 @@ export const Form = () => {
   const snackbar = useSnackbar();
   const history = useHistory();
   const { id } = useParams();
-  const [genre, setGenre] = useState<{ id: string } | null>(null);
-  const [categories, setCategories] = useState<any[]>([]);
+  const [genre, setGenre] = useState<Genre | null>(null);
+  const [categories, setCategories] = useState<Category[]>([]);
   const category = getValues()["categories_id"];
   const [loading, setLoading] = useState<boolean>(false);
-
-  const buttonProps: ButtonProps = {
-    className: classes.submit,
-    color: "secondary",
-    variant: "contained",
-  };
 
   useEffect(() => {
     register({ name: "categories_id" });
   }, [register]);
 
   useEffect(() => {
-    async function loadData() {
+    let isSubscribed = true;
+    (async () => {
       setLoading(true);
 
       const promises = [categoryHttp.list()];
@@ -80,28 +68,36 @@ export const Form = () => {
 
       try {
         const [categoriesResponse, genreResponse] = await Promise.all(promises);
-        setCategories(categoriesResponse.data.data);
 
-        if (id) {
-          setGenre(genreResponse.data.data);
-          reset({
-            ...genreResponse.data.data,
-            categories_id: genreResponse.data.data.categories.map(
+        if (isSubscribed) {
+          setCategories(categoriesResponse.data.data);
+
+          if (id) {
+            setGenre(genreResponse.data.data);
+            
+            const categories_id = genreResponse.data.data.categories.map(
               (category) => category.id
-            ),
-          });
+            );
+
+            reset({
+              ...genreResponse.data.data,
+              categories_id: categories_id,
+            });
+          }
         }
       } catch (error) {
-        console.log(error);
+        console.error(error);
         snackbar.enqueueSnackbar("Não foi possível carregar as informações", {
           variant: "error",
         });
       } finally {
         setLoading(false);
       }
-    }
+    })();
 
-    loadData();
+    return () => {
+      isSubscribed = false;
+    }
   }, []);
 
   async function onSubmit(formData, event) {
@@ -112,21 +108,23 @@ export const Form = () => {
         ? genreHttp.create(formData)
         : genreHttp.update(genre.id, formData);
 
-      const {data} = await http;
-      snackbar.enqueueSnackbar('Gênero salvo com sucesso', {variant: "success"});
+      const { data } = await http;
+      snackbar.enqueueSnackbar("Gênero salvo com sucesso", {
+        variant: "success",
+      });
 
       setTimeout(() => {
         event
-        ? (
-          id
-          ? history.replace(`/genres/${data.data.id}/edit`)
-          : history.push(`/genres/${data.data.id}/edit`)
-        ) : history.push(`/genres`);
-
+          ? id
+            ? history.replace(`/genres/${data.data.id}/edit`)
+            : history.push(`/genres/${data.data.id}/edit`)
+          : history.push(`/genres`);
       });
     } catch (error) {
       console.log(error);
-      snackbar.enqueueSnackbar('Não foi possível salvar o gênero', {variant: "error"});
+      snackbar.enqueueSnackbar("Não foi possível salvar o gênero", {
+        variant: "error",
+      });
     } finally {
       setLoading(false);
     }
@@ -163,7 +161,9 @@ export const Form = () => {
         SelectProps={{ multiple: true }}
         disabled={loading}
         error={errors.categories_id !== undefined}
-        helperText={errors.categories_id && (errors.categories_id as any).message}
+        helperText={
+          errors.categories_id && (errors.categories_id as any).message
+        }
         InputLabelProps={{ shrink: true }}
       >
         <MenuItem value="" disabled>
@@ -176,14 +176,13 @@ export const Form = () => {
         ))}
       </TextField>
 
-      <Box dir={"rtl"}>
-        <Button {...buttonProps} onClick={() => onSubmit(getValues(), null)}>
-          Salvar
-        </Button>
-        <Button {...buttonProps} type="submit">
-          Salvar e continuar editando
-        </Button>
-      </Box>
+      <SubmitActions
+        disabledButtons={loading}
+        handleSave={async () => {
+          let isValid: boolean = await trigger();
+          if (isValid) onSubmit(getValues(), null);
+        }}
+      ></SubmitActions>
     </form>
   );
 };

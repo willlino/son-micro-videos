@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import format from "date-fns/format";
 import parseISO from "date-fns/parseISO";
 import castMemberHttp from '../../util/http/cast-member-http';
+import { ListResponse, CastMember } from "../../util/models";
 
 const CastMemberTypeMap = {
   1: 'Diretor',
@@ -39,12 +40,19 @@ type Props = {};
 
 const Table = (props: Props) => {
 
-  const [data, setData] = useState([]);
+  const [data, setData] = useState<CastMember[]>([]);
 
   useEffect(() => {
-    castMemberHttp.list().then(({data}) => 
-        setData(data.data)
-      )
+    let isSubscribed = true;
+
+    (async () => {
+      const { data } = await castMemberHttp.list<ListResponse<CastMember>>();
+      if (isSubscribed) setData(data.data);
+    })();
+
+    return () => {
+      isSubscribed = false;
+    };
   }, []);
 
   return (

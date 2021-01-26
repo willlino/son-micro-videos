@@ -5,6 +5,7 @@ import format from "date-fns/format";
 import parseISO from "date-fns/parseISO";
 import genreHttp from '../../util/http/genre-http';
 import { BadgeYes, BadgeNo } from "../../components/Badge";
+import { Genre, ListResponse } from "../../util/models";
 
 const columnsDefinition: MUIDataTableColumn[] = [
   {
@@ -44,12 +45,19 @@ type Props = {};
 
 const Table = (props: Props) => {
 
-  const [data, setData] = useState([]);
+  const [data, setData] = useState<Genre[]>([]);
 
   useEffect(() => {
-    genreHttp.list().then(({data}) => 
-        setData(data.data)
-      )
+    let isSubscribed = true;
+
+    (async () => {
+      const { data } = await genreHttp.list<ListResponse<Genre>>();
+      if (isSubscribed) setData(data.data);
+    })();
+
+    return () => {
+      isSubscribed = false;
+    };
   }, [])
 
   return (
