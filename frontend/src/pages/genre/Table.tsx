@@ -1,11 +1,12 @@
 import * as React from "react";
-import MUIDataTable, { MUIDataTableColumn } from "mui-datatables";
+import { MUIDataTableColumn } from "mui-datatables";
 import { useEffect, useState } from "react";
 import format from "date-fns/format";
 import parseISO from "date-fns/parseISO";
 import genreHttp from '../../util/http/genre-http';
 import { BadgeYes, BadgeNo } from "../../components/Badge";
 import { Genre, ListResponse } from "../../util/models";
+import DefaultTable from "../../components/Table";
 
 const columnsDefinition: MUIDataTableColumn[] = [
   {
@@ -62,7 +63,7 @@ const Table = (props: Props) => {
 
   return (
     <div>
-      <MUIDataTable
+      <DefaultTable
         title=""
         columns={columnsDefinition}
         data={data}

@@ -1,18 +1,27 @@
 import * as React from "react";
-import { MUIDataTableColumn } from "mui-datatables";
 import { useEffect, useState } from "react";
 import categoryHttp from "../../util/http/category-http";
-import { Chip } from "@material-ui/core";
+import { Chip, Snackbar } from "@material-ui/core";
 import format from "date-fns/format";
 import parseISO from "date-fns/parseISO";
 import { BadgeYes, BadgeNo } from "../../components/Badge";
-import DefaultTable from "../../components/Table";
+import DefaultTable, { TableColumn } from "../../components/Table";
 import { ListResponse, Category } from "../../util/models";
+import { useSnackbar } from "notistack";
 
-const columnsDefinition: MUIDataTableColumn[] = [
+const columnsDefinition: TableColumn[] = [
+  {
+    name: "id",
+    label: "ID",
+    width: "30%",
+    options: {
+      sort: false,
+    },
+  },
   {
     name: "name",
     label: "Nome",
+    width: "43%",
   },
   {
     name: "active",
@@ -22,6 +31,7 @@ const columnsDefinition: MUIDataTableColumn[] = [
         return value ? <BadgeYes /> : <BadgeNo />;
       },
     },
+    width: "4%",
   },
   {
     name: "created_at",
@@ -31,20 +41,38 @@ const columnsDefinition: MUIDataTableColumn[] = [
         return <span>{format(parseISO(value), "dd/MM/yyyy")}</span>;
       },
     },
+    width: "10%",
+  },
+  {
+    name: "actions",
+    label: "Ações",
+    width: "13%",
   },
 ];
 
 type Props = {};
 
 const Table = (props: Props) => {
+  const snackbar = useSnackbar();
   const [data, setData] = useState<Category[]>([]);
+  const [loading, setLoading] = useState<boolean>(false);
 
   useEffect(() => {
     let isSubscribed = true;
 
     (async () => {
-      const { data } = await categoryHttp.list<ListResponse<Category>>();
-      if (isSubscribed) setData(data.data);
+      setLoading(true);
+      try {
+        const { data } = await categoryHttp.list<ListResponse<Category>>();
+        if (isSubscribed) setData(data.data);
+      } catch (error) {
+        console.error(error);
+        snackbar.enqueueSnackbar("Não foi possível carregar as informações", {
+          variant: "error",
+        });
+      } finally {
+        setLoading(false);
+      }
     })();
 
     return () => {
@@ -53,7 +81,12 @@ const Table = (props: Props) => {
   }, []);
 
   return (
-      <DefaultTable title="" columns={columnsDefinition} data={data} />
+    <DefaultTable
+      title=""
+      columns={columnsDefinition}
+      data={data}
+      loading={loading}
+    />
   );
 };
 
