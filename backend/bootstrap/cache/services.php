@@ -33,10 +33,11 @@
     29 => 'Carbon\\Laravel\\ServiceProvider',
     30 => 'NunoMaduro\\Collision\\Adapters\\Laravel\\CollisionServiceProvider',
     31 => 'Superbalist\\LaravelGoogleCloudStorage\\GoogleCloudStorageServiceProvider',
-    32 => 'App\\Providers\\AppServiceProvider',
-    33 => 'App\\Providers\\AuthServiceProvider',
-    34 => 'App\\Providers\\EventServiceProvider',
-    35 => 'App\\Providers\\RouteServiceProvider',
+    32 => 'EloquentFilter\\ServiceProvider',
+    33 => 'App\\Providers\\AppServiceProvider',
+    34 => 'App\\Providers\\AuthServiceProvider',
+    35 => 'App\\Providers\\EventServiceProvider',
+    36 => 'App\\Providers\\RouteServiceProvider',
   ),
   'eager' => 
   array (
@@ -59,10 +60,11 @@
     16 => 'Carbon\\Laravel\\ServiceProvider',
     17 => 'NunoMaduro\\Collision\\Adapters\\Laravel\\CollisionServiceProvider',
     18 => 'Superbalist\\LaravelGoogleCloudStorage\\GoogleCloudStorageServiceProvider',
-    19 => 'App\\Providers\\AppServiceProvider',
-    20 => 'App\\Providers\\AuthServiceProvider',
-    21 => 'App\\Providers\\EventServiceProvider',
-    22 => 'App\\Providers\\RouteServiceProvider',
+    19 => 'EloquentFilter\\ServiceProvider',
+    20 => 'App\\Providers\\AppServiceProvider',
+    21 => 'App\\Providers\\AuthServiceProvider',
+    22 => 'App\\Providers\\EventServiceProvider',
+    23 => 'App\\Providers\\RouteServiceProvider',
   ),
   'deferred' => 
   array (
