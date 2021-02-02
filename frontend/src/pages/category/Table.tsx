@@ -62,7 +62,6 @@ const columnsDefinition: TableColumn[] = [
     options: {
       sort: false,
       customBodyRender: (value, tableMeta) => {
-        console.log(tableMeta);
         return <IconButton 
           color={'secondary'}
           component={Link}

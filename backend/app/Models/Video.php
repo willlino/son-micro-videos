@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Video extends Model
 {
-    use SoftDeletes, Traits\Uuid, UploadFiles;
+    use SoftDeletes, Traits\Uuid, UploadFiles, Filterable;
 
     const RATING_LIST = ['L', '10', '12', '14', '16', '18'];
 
