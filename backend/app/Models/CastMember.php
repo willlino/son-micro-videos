@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\ModelFilters\CastMemberFilter;
+use EloquentFilter\Filterable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
@@ -20,4 +22,8 @@ class CastMember extends Model
         'active' => 'boolean'
     ];
     public $incrementing = false;
+
+    public function modelFilter(){
+        return $this->provideFilter(CastMemberFilter::class);
+    }
 }

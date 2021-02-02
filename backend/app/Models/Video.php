@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\ModelFilters\VideoFilter;
+use EloquentFilter\Filterable;
 use App\Models\Traits\UploadFiles;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -125,5 +127,9 @@ class Video extends Model
     public function getVideoFileUrlAttribute()
     {
         return $this->video_file ? $this->getFileUrl($this->video_file) : null;
+    }
+
+    public function modelFilter(){
+        return $this->provideFilter(VideoFilter::class);
     }
 }

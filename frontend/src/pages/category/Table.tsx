@@ -1,13 +1,25 @@
 import * as React from "react";
 import { useEffect, useState } from "react";
 import categoryHttp from "../../util/http/category-http";
-import { Chip, Snackbar } from "@material-ui/core";
+import {
+  Chip,
+  Snackbar,
+  MuiThemeProvider,
+  Theme,
+  IconButton
+} from "@material-ui/core";
+import { Link } from "react-router-dom";
+import EditIcon from '@material-ui/icons/Edit';
 import format from "date-fns/format";
 import parseISO from "date-fns/parseISO";
 import { BadgeYes, BadgeNo } from "../../components/Badge";
-import DefaultTable, { TableColumn } from "../../components/Table";
+import DefaultTable, {
+  makeActionStyles,
+  TableColumn,
+} from "../../components/Table";
 import { ListResponse, Category } from "../../util/models";
 import { useSnackbar } from "notistack";
+
 
 const columnsDefinition: TableColumn[] = [
   {
@@ -47,6 +59,19 @@ const columnsDefinition: TableColumn[] = [
     name: "actions",
     label: "Ações",
     width: "13%",
+    options: {
+      sort: false,
+      customBodyRender: (value, tableMeta) => {
+        console.log(tableMeta);
+        return <IconButton 
+          color={'secondary'}
+          component={Link}
+          to={`/categories/${tableMeta.rowData[0]}/edit`}
+        >
+          <EditIcon fontSize={'inherit'}/>
+        </IconButton>;
+      },
+    },
   },
 ];
 
@@ -81,12 +106,14 @@ const Table = (props: Props) => {
   }, []);
 
   return (
-    <DefaultTable
-      title=""
-      columns={columnsDefinition}
-      data={data}
-      loading={loading}
-    />
+    <MuiThemeProvider theme={makeActionStyles(columnsDefinition.length - 1)}>
+      <DefaultTable
+        title=""
+        columns={columnsDefinition}
+        data={data}
+        loading={loading}
+      />
+    </MuiThemeProvider>
   );
 };
 

@@ -1,14 +1,26 @@
 import * as React from "react";
-import { MUIDataTableColumn } from "mui-datatables";
 import { useEffect, useState } from "react";
 import format from "date-fns/format";
 import parseISO from "date-fns/parseISO";
 import genreHttp from '../../util/http/genre-http';
 import { BadgeYes, BadgeNo } from "../../components/Badge";
 import { Genre, ListResponse } from "../../util/models";
-import DefaultTable from "../../components/Table";
+import DefaultTable, {
+  makeActionStyles,
+  TableColumn,
+} from "../../components/Table";
+import { IconButton, MuiThemeProvider } from "@material-ui/core";
+import { Link } from "react-router-dom";
+import EditIcon from '@material-ui/icons/Edit';
 
-const columnsDefinition: MUIDataTableColumn[] = [
+const columnsDefinition: TableColumn[] = [
+  {
+    name: "id",
+    label: "ID",
+    options: {
+      sort: false,
+    },
+  },
   {
     name: "name",
     label: "Nome",
@@ -40,6 +52,24 @@ const columnsDefinition: MUIDataTableColumn[] = [
       }
     }
   },
+  {
+    name: "actions",
+    label: "Ações",
+    width: "13%",
+    options: {
+      sort: false,
+      customBodyRender: (value, tableMeta) => {
+        console.log(tableMeta);
+        return <IconButton 
+          color={'secondary'}
+          component={Link}
+          to={`/genres/${tableMeta.rowData[0]}/edit`}
+        >
+          <EditIcon/>
+        </IconButton>;
+      },
+    },
+  }
 ];
 
 type Props = {};
@@ -62,13 +92,13 @@ const Table = (props: Props) => {
   }, [])
 
   return (
-    <div>
+    <MuiThemeProvider theme={makeActionStyles(columnsDefinition.length - 1)}>
       <DefaultTable
         title=""
         columns={columnsDefinition}
         data={data}
       />
-    </div>
+    </MuiThemeProvider>
   );
 };
 

@@ -2,10 +2,9 @@
 
 namespace App\ModelFilters;
 
-
-class CategoryFilter extends DefaultModelFilter
+class CastMemberFilter  extends DefaultModelFilter
 {
-    protected $sortable = ['name', 'active', 'created_at'];
+    protected $sortable = ['name', 'type','active', 'created_at'];
 
     public function search($search){
         $this->where('name', 'LIKE', "%$search%");

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\ModelFilters\CategoryFilter;
 use EloquentFilter\Filterable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -18,6 +19,6 @@ class Category extends Model
     public $incrementing = false;
 
     public function modelFilter(){
-        return $this->providerFilter(CategoryFilter::class);
+        return $this->provideFilter(CategoryFilter::class);
     }
 }

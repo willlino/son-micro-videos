@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\ModelFilters\GenreFilter;
+use EloquentFilter\Filterable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
@@ -19,5 +21,9 @@ class Genre extends Model
     public function categories()
     {
         return $this->belongsToMany(Category::class)->withTrashed(); 
+    }
+
+    public function modelFilter(){
+        return $this->provideFilter(GenreFilter::class);
     }
 }
