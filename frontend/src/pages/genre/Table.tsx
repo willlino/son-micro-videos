@@ -9,6 +9,7 @@ import DefaultTable, {
   makeActionStyles,
   TableColumn,
 } from "../../components/Table";
+import {FilterResetButton} from "../../components/Table/FilterResetButton";
 import { IconButton, MuiThemeProvider } from "@material-ui/core";
 import { Link } from "react-router-dom";
 import EditIcon from "@material-ui/icons/Edit";
@@ -92,11 +93,7 @@ interface SearchState {
 }
 
 const Table = () => {
-  const snackbar = useSnackbar();
-  const subscribed = useRef(true);
-  const [data, setData] = useState<Genre[]>([]);
-  const [loading, setLoading] = useState<boolean>(false);
-  const [searchState, setSearchState] = useState<SearchState>({
+  const initialState = {
     search: "",
     pagination: {
       page: 1,
@@ -107,7 +104,12 @@ const Table = () => {
       sort: null,
       dir: null,
     },
-  });
+  };
+  const snackbar = useSnackbar();
+  const subscribed = useRef(true);
+  const [data, setData] = useState<Genre[]>([]);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [searchState, setSearchState] = useState<SearchState>(initialState);
 
   const columns = columnsDefinition.map((column) => {
     return column.name === searchState.order.sort
@@ -162,6 +164,10 @@ const Table = () => {
       }
     } catch (error) {
       console.error(error);
+      if(genreHttp.isCancelRequest(error)){
+        return;
+      }
+      
       snackbar.enqueueSnackbar("Não foi possível carregar as informações", {
         variant: "error",
       });
@@ -183,12 +189,21 @@ const Table = () => {
           page: searchState.pagination.page - 1,
           rowsPerPage: searchState.pagination.per_page,
           count: searchState.pagination.total,
+          customToolbar: () => (
+            <FilterResetButton handleClick={() => {
+              setSearchState(initialState);
+            }}/>
+          ),
           onSearchChange: (value) =>
             setSearchState(
               (prevState) =>
                 ({
                   ...prevState,
                   search: value,
+                  pagination: {
+                    ...prevState.pagination,
+                    page: 1
+                  }
                 } as SearchState)
             ),
           onChangePage: (page) =>
