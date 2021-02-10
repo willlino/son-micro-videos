@@ -30,7 +30,7 @@ const useStyles = makeStyles(
   { name: 'MUIDataTableSearch' },
 );
 
-const DebouncedTableSearch = ({ options, searchText, onSearch, onHide }) => {
+const DebouncedTableSearch = ({ options, searchText, onSearch, onHide, debounceTime }) => {
   const classes = useStyles();
 
   const [text, setText] = useState(searchText);
@@ -50,7 +50,7 @@ const DebouncedTableSearch = ({ options, searchText, onSearch, onHide }) => {
     dispatchOnSearch(text)
   }, [text]);
 
-  const dispatchOnSearch = useCallback(debounce(value => onSearch(value), 500), []);
+  const dispatchOnSearch = useCallback(debounce(value => onSearch(value), debounceTime), []);
 
   const onKeyDown = event => {
     if (event.key === 'Escape') {
