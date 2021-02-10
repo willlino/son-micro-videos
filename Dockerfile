@@ -22,6 +22,7 @@ RUN ln -s public html
 RUN usermod -u 1000 www-data
 USER www-data
 
+
 EXPOSE 9000
 
 ENTRYPOINT ["php-fpm"]

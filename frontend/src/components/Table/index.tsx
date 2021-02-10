@@ -5,7 +5,13 @@ import MUIDataTable, {
   MUIDataTableProps,
 } from "mui-datatables";
 import { merge, omit, cloneDeep } from "lodash";
-import { MuiThemeProvider, Theme, useMediaQuery, useTheme } from "@material-ui/core";
+import {
+  MuiThemeProvider,
+  Theme,
+  useMediaQuery,
+  useTheme
+} from "@material-ui/core";
+import DebouncedTableSearch from "./DebouncedTableSearch";
 
 export interface TableColumn extends MUIDataTableColumn {
   width?: string;
@@ -47,6 +53,14 @@ const defaultOptions: MUIDataTableOptions = {
       deleteAria: "Excluir registros selecionados",
     },
   },
+  customSearchRender: (
+    searchText: string,
+    handleSearch: (text: string) => void,
+    hideSearch: () => void,
+    options: any
+  ) => {
+    return <DebouncedTableSearch searchText={searchText} onSearch={handleSearch} onHide={hideSearch} options={options} />;
+  },
 };
 
 export interface TableProps extends MUIDataTableProps {
@@ -81,8 +95,8 @@ const Table: React.FC<TableProps> = (props) => {
       newProps.loading === true ? "Carregando..." : textLabels.body.noMatch;
   }
 
-  function applyResponsive(){
-    newProps.options.responsive = isSmOrDown ? 'standard' : 'simple';
+  function applyResponsive() {
+    newProps.options.responsive = isSmOrDown ? "standard" : "simple";
   }
 
   function getOriginalMuiDataTableProps() {
@@ -90,9 +104,9 @@ const Table: React.FC<TableProps> = (props) => {
   }
 
   const theme = cloneDeep<Theme>(useTheme());
-  
-  const isSmOrDown = useMediaQuery(theme.breakpoints.down('sm'));
-  
+
+  const isSmOrDown = useMediaQuery(theme.breakpoints.down("sm"));
+
   const newProps = merge({ options: cloneDeep(defaultOptions) }, props, {
     columns: extractMUIDataTableColumns(props.columns),
   });
@@ -111,17 +125,17 @@ const Table: React.FC<TableProps> = (props) => {
 export default Table;
 
 export function makeActionStyles(column) {
-  return theme => {
+  return (theme) => {
     const copyTheme = cloneDeep(theme);
-  
+
     const selector = `&[data-testid^="MuiDataTableBodyCell-${column}"]`;
-  
+
     const tableCell = (copyTheme.overrides as any).MUIDataTableBodyCell;
     (tableCell as any).root[selector] = {
-      paddingTop: '0px',
-      paddingBottom: '0px'
+      paddingTop: "0px",
+      paddingBottom: "0px",
     };
-  
+
     return copyTheme;
-  }
+  };
 }
