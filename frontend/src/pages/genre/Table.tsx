@@ -1,5 +1,5 @@
 import * as React from "react";
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useReducer } from "react";
 import format from "date-fns/format";
 import parseISO from "date-fns/parseISO";
 import genreHttp from "../../util/http/genre-http";
@@ -9,11 +9,12 @@ import DefaultTable, {
   makeActionStyles,
   TableColumn,
 } from "../../components/Table";
-import {FilterResetButton} from "../../components/Table/FilterResetButton";
+import { FilterResetButton } from "../../components/Table/FilterResetButton";
 import { IconButton, MuiThemeProvider } from "@material-ui/core";
 import { Link } from "react-router-dom";
 import EditIcon from "@material-ui/icons/Edit";
 import { useSnackbar } from "notistack";
+import reducer, { INITIAL_STATE, Creators } from "../../store/search";
 
 const columnsDefinition: TableColumn[] = [
   {
@@ -93,23 +94,11 @@ interface SearchState {
 }
 
 const Table = () => {
-  const initialState = {
-    search: "",
-    pagination: {
-      page: 1,
-      total: 0,
-      per_page: 10,
-    },
-    order: {
-      sort: null,
-      dir: null,
-    },
-  };
   const snackbar = useSnackbar();
   const subscribed = useRef(true);
   const [data, setData] = useState<Genre[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
-  const [searchState, setSearchState] = useState<SearchState>(initialState);
+  const [searchState, dispatch] = useReducer(reducer, INITIAL_STATE);
 
   const columns = columnsDefinition.map((column) => {
     return column.name === searchState.order.sort
@@ -151,23 +140,23 @@ const Table = () => {
       });
       if (subscribed.current) {
         setData(data.data);
-        setSearchState(
-          (prevState) =>
-            ({
-              ...prevState,
-              pagination: {
-                ...prevState.pagination,
-                total: data.meta.total,
-              },
-            } as SearchState)
-        );
+        // setSearchState(
+        //   (prevState) =>
+        //     ({
+        //       ...prevState,
+        //       pagination: {
+        //         ...prevState.pagination,
+        //         total: data.meta.total,
+        //       },
+        //     } as SearchState)
+        // );
       }
     } catch (error) {
       console.error(error);
-      if(genreHttp.isCancelRequest(error)){
+      if (genreHttp.isCancelRequest(error)) {
         return;
       }
-      
+
       snackbar.enqueueSnackbar("Não foi possível carregar as informações", {
         variant: "error",
       });
@@ -176,9 +165,9 @@ const Table = () => {
     }
   }
 
-  function clearSearchText(text){
+  function clearSearchText(text) {
     let newText = text;
-    if(text && text.value !== undefined){
+    if (text && text.value !== undefined) {
       newText = text.value;
     }
 
@@ -195,65 +184,30 @@ const Table = () => {
         debouncedSearchTime={500}
         options={{
           serverSide: true,
-          searchText: searchState.search,
+          searchText: searchState.search as any,
           page: searchState.pagination.page - 1,
           rowsPerPage: searchState.pagination.per_page,
           count: searchState.pagination.total,
           customToolbar: () => (
-            <FilterResetButton handleClick={() => {
-              setSearchState({
-                ...initialState,
-                  search: {
-                    value: initialState.search,
-                    updated: true
-                  } as any
-              });
-            }}/>
+            // <FilterResetButton
+            //   handleClick={() => {
+            //     dispatch({ type: "reset" });
+            //   }}
+            // />
+            ""
           ),
-          onSearchChange: (value) =>
-            setSearchState(
-              (prevState) =>
-                ({
-                  ...prevState,
-                  search: value,
-                  pagination: {
-                    ...prevState.pagination,
-                    page: 1
-                  }
-                } as SearchState)
-            ),
+          onSearchChange: (value: any) =>
+            dispatch(Creators.setSearch({ search: value })),
           onChangePage: (page) =>
-            setSearchState(
-              (prevState) =>
-                ({
-                  ...prevState,
-                  pagination: {
-                    ...prevState.pagination,
-                    page: page + 1,
-                  },
-                } as SearchState)
-            ),
+            dispatch(Creators.setPage({ page: page + 1 })),
           onChangeRowsPerPage: (perPage) =>
-            setSearchState(
-              (prevState) =>
-                ({
-                  ...prevState,
-                  pagination: {
-                    ...prevState.pagination,
-                    per_page: perPage,
-                  },
-                } as SearchState)
-            ),
+            dispatch(Creators.setPerPage({ per_page: perPage })),
           onColumnSortChange: (changedColumn: string, direction: string) =>
-            setSearchState(
-              (prevState) =>
-                ({
-                  ...prevState,
-                  order: {
-                    sort: changedColumn,
-                    dir: direction.includes("desc") ? "desc" : "asc",
-                  },
-                } as SearchState)
+            dispatch(
+              Creators.setOrder({
+                sort: changedColumn,
+                dir: direction.includes("desc") ? "desc" : "asc",
+              })
             ),
         }}
       />
