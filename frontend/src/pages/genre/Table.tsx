@@ -1,5 +1,5 @@
 import * as React from "react";
-import { useEffect, useState, useRef, useReducer } from "react";
+import { useEffect, useState, useRef } from "react";
 import format from "date-fns/format";
 import parseISO from "date-fns/parseISO";
 import genreHttp from "../../util/http/genre-http";
@@ -14,7 +14,8 @@ import { IconButton, MuiThemeProvider } from "@material-ui/core";
 import { Link } from "react-router-dom";
 import EditIcon from "@material-ui/icons/Edit";
 import { useSnackbar } from "notistack";
-import reducer, { INITIAL_STATE, Creators } from "../../store/filter";
+import { Creators } from "../../store/filter";
+import useFilter from "../../hooks/useFilter";
 
 const columnsDefinition: TableColumn[] = [
   {
@@ -81,8 +82,7 @@ const Table = () => {
   const subscribed = useRef(true);
   const [data, setData] = useState<Genre[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
-  const [totalRecords, setTotalRecords] = useState<number>(0);
-  const [filterState, dispatch] = useReducer(reducer, INITIAL_STATE);
+  const { filterState, dispatch, totalRecords, setTotalRecords } = useFilter();
 
   const columns = columnsDefinition.map((column) => {
     return column.name === filterState.order.sort
@@ -173,7 +173,7 @@ const Table = () => {
           onChangePage: (page) =>
             dispatch(Creators.setPage({ page: page + 1 })),
           onChangeRowsPerPage: (perPage) =>
-            dispatch(Creators.setPerPage({ per_page: perPage })), 
+            dispatch(Creators.setPerPage({ per_page: perPage })),
           onColumnSortChange: (changedColumn: string, direction: string) =>
             dispatch(
               Creators.setOrder({
