@@ -76,7 +76,7 @@ export default function Breadcrumbs() {
             >
               {breadcrumbNameMap[route]}
             </LinkRouter>
-          );
+          ); 
         })}
       </MuiBreadcrumbs>
     );
