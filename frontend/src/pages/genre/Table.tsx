@@ -82,18 +82,11 @@ const Table = () => {
   const subscribed = useRef(true);
   const [data, setData] = useState<Genre[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
-  const { filterState, dispatch, totalRecords, setTotalRecords } = useFilter();
-
-  const columns = columnsDefinition.map((column) => {
-    return column.name === filterState.order.sort
-      ? {
-          ...column,
-          options: {
-            ...column.options,
-            sortDirection: filterState.order.dir as any,
-          },
-        }
-      : column;
+  const { columns, filterManager, filterState, dispatch, totalRecords, setTotalRecords } = useFilter({
+    columns: columnsDefinition,
+    debounceTime: 300,
+    rowsPerPage: 10,
+    rowsPerPageOptions: [10, 25, 50] 
   });
 
   useEffect(() => {
@@ -168,20 +161,12 @@ const Table = () => {
               handleClick={() => dispatch(Creators.setReset())}
             />
           ),
-          onSearchChange: (value: any) =>
-            dispatch(Creators.setSearch({ search: value })),
-          onChangePage: (page) =>
-            dispatch(Creators.setPage({ page: page + 1 })),
-          onChangeRowsPerPage: (perPage) =>
-            dispatch(Creators.setPerPage({ per_page: perPage })),
-          onColumnSortChange: (changedColumn: string, direction: string) =>
-            dispatch(
-              Creators.setOrder({
-                sort: changedColumn,
-                dir: direction.includes("desc") ? "desc" : "asc",
-              })
-            ),
-        }}
+          onSearchChange: (value: any) => filterManager.changeSearch(value),
+          onChangePage: (page) => filterManager.changePage(page),
+          onChangeRowsPerPage: (perPage) => filterManager.changeRowsPerPage(perPage),
+          onColumnSortChange: (changedColumn: string, direction: string) => 
+            filterManager.changeColumnSort(changedColumn, direction)
+          }}
       />
     </MuiThemeProvider>
   );
