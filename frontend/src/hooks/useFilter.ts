@@ -3,6 +3,7 @@ import reducer, { Creators, INITIAL_STATE } from "../store/filter";
 import { Actions as FilterActions, State as FilterState } from "../store/filter/types";
 import { MUIDataTableColumn } from "mui-datatables";
 import { Reducer } from "react";
+import { useDebounce } from "use-debounce";
 
 interface FilterManagerOptions {
     columns: MUIDataTableColumn[];
@@ -16,6 +17,7 @@ export default function useFilter(options: FilterManagerOptions) {
     // pegar o state da URL
     const [totalRecords, setTotalRecords] = useState<number>(0);
     const [filterState, dispatch] = useReducer<Reducer<FilterState, FilterActions>>(reducer, INITIAL_STATE);
+    const [debouncedFilterState] = useDebounce(filterState, options.debounceTime);
     filterManager.state = filterState;
     filterManager.dispatch = dispatch;
 
@@ -24,6 +26,7 @@ export default function useFilter(options: FilterManagerOptions) {
         columns: filterManager.columns,
         filterManager,
         filterState,
+        debouncedFilterState,
         dispatch,
         totalRecords,
         setTotalRecords
@@ -37,14 +40,12 @@ export class FilterManager {
     columns: MUIDataTableColumn[];
     rowsPerPage: number;
     rowsPerPageOptions: number[];
-    debounceTime: number;
 
     constructor(options: FilterManagerOptions) {
         const { columns, rowsPerPage, rowsPerPageOptions, debounceTime } = options;
         this.columns = columns;
         this.rowsPerPage = rowsPerPage;
         this.rowsPerPageOptions = rowsPerPageOptions;
-        this.debounceTime = debounceTime;
     }
 
     changeSearch(value: any) {
@@ -71,14 +72,23 @@ export class FilterManager {
     applyOrderInColumns() {
         this.columns = this.columns.map((column) => {
             return column.name === this.state.order.sort
-              ? {
-                  ...column,
-                  options: {
-                    ...column.options,
-                    sortDirection: this.state.order.dir as any,
-                  },
+                ? {
+                    ...column,
+                    options: {
+                        ...column.options,
+                        sortDirection: this.state.order.dir as any,
+                    },
                 }
-              : column;
-          });
+                : column;
+        });
+    }
+
+    clearSearchText(text) {
+        let newText = text;
+        if (text && text.value !== undefined) {
+            newText = text.value;
+        }
+
+        return newText;
     }
 }

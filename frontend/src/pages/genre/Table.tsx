@@ -77,14 +77,25 @@ const columnsDefinition: TableColumn[] = [
   },
 ];
 
+const debounceTime = 300;
+const debouncedSearchTime = 300;
+
 const Table = () => {
   const snackbar = useSnackbar();
   const subscribed = useRef(true);
   const [data, setData] = useState<Genre[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
-  const { columns, filterManager, filterState, dispatch, totalRecords, setTotalRecords } = useFilter({
+  const { 
+    columns, 
+    filterManager, 
+    filterState,
+    debouncedFilterState,
+    dispatch, 
+    totalRecords, 
+    setTotalRecords 
+  } = useFilter({
     columns: columnsDefinition,
-    debounceTime: 300,
+    debounceTime: debounceTime,
     rowsPerPage: 10,
     rowsPerPageOptions: [10, 25, 50] 
   });
@@ -97,10 +108,10 @@ const Table = () => {
       subscribed.current = false;
     };
   }, [
-    filterState.search,
-    filterState.pagination.page,
-    filterState.pagination.per_page,
-    filterState.order,
+    filterManager.clearSearchText(debouncedFilterState.search),
+    debouncedFilterState.pagination.page,
+    debouncedFilterState.pagination.per_page,
+    debouncedFilterState.order,
   ]);
 
   async function getData() {
@@ -108,7 +119,7 @@ const Table = () => {
     try {
       const { data } = await genreHttp.list<ListResponse<Genre>>({
         queryParams: {
-          search: clearSearchText(filterState.search),
+          search: filterManager.clearSearchText(filterState.search),
           page: filterState.pagination.page,
           per_page: filterState.pagination.per_page,
           sort: filterState.order.sort,
@@ -133,15 +144,6 @@ const Table = () => {
     }
   }
 
-  function clearSearchText(text) {
-    let newText = text;
-    if (text && text.value !== undefined) {
-      newText = text.value;
-    }
-
-    return newText;
-  }
-
   return (
     <MuiThemeProvider theme={makeActionStyles(columnsDefinition.length - 1)}>
       <DefaultTable
@@ -149,7 +151,7 @@ const Table = () => {
         columns={columns}
         data={data}
         loading={loading}
-        debouncedSearchTime={500}
+        debouncedSearchTime={debouncedSearchTime}
         options={{
           serverSide: true,
           searchText: filterState.search as any,

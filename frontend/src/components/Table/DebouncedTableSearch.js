@@ -37,13 +37,14 @@ const DebouncedTableSearch = ({ options, searchText, onSearch, onHide, debounceT
 
   let value = text;
 
-  if (searchText && searchText.value !== undefined) {
+  if (searchText && searchText.value !== undefined && searchText !== value) {
     value = searchText.value;
   }
 
   const handleTextChange = event => {
     const value = event.target.value;
-    setText(value);
+    if (text !== value)
+      setText(value);
   };
 
   useEffect(() => {
