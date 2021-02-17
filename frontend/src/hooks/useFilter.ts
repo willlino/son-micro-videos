@@ -4,16 +4,24 @@ import { Actions as FilterActions, State as FilterState } from "../store/filter/
 import { MUIDataTableColumn } from "mui-datatables";
 import { Reducer } from "react";
 import { useDebounce } from "use-debounce";
+import { useHistory } from "react-router";
+import { History } from "history";
 
 interface FilterManagerOptions {
     columns: MUIDataTableColumn[];
     rowsPerPage: number;
     rowsPerPageOptions: number[];
     debounceTime: number;
+    history: History;
 }
 
-export default function useFilter(options: FilterManagerOptions) {
-    const filterManager = new FilterManager(options);
+interface UseFilterOptions extends Omit<FilterManagerOptions, 'history'> {
+
+}
+
+export default function useFilter(options: UseFilterOptions) {
+    const history = useHistory();
+    const filterManager = new FilterManager({ ...options, history });
     // pegar o state da URL
     const [totalRecords, setTotalRecords] = useState<number>(0);
     const [filterState, dispatch] = useReducer<Reducer<FilterState, FilterActions>>(reducer, INITIAL_STATE);
@@ -40,12 +48,14 @@ export class FilterManager {
     columns: MUIDataTableColumn[];
     rowsPerPage: number;
     rowsPerPageOptions: number[];
+    history: History;
 
     constructor(options: FilterManagerOptions) {
-        const { columns, rowsPerPage, rowsPerPageOptions, debounceTime } = options;
+        const { columns, rowsPerPage, rowsPerPageOptions, history } = options;
         this.columns = columns;
         this.rowsPerPage = rowsPerPage;
         this.rowsPerPageOptions = rowsPerPageOptions;
+        this.history = history;
     }
 
     changeSearch(value: any) {
@@ -90,5 +100,31 @@ export class FilterManager {
         }
 
         return newText;
+    }
+
+    pushHistory() {
+        const newLocation = {
+            pathName: this.history.location.pathname,
+            search: "?" + new URLSearchParams(this.formatSearchParams() as any),
+            state: {
+                ...this.state,
+                search: this.clearSearchText(this.state.search)
+            }
+        }
+        this.history.push(newLocation);
+    }
+
+    private formatSearchParams() {
+        const search = this.clearSearchText(this.state.search);
+
+        return {
+            ...(search && search !== '' && { search: search }),
+            ...(this.state.pagination.page !== 1 && { page: this.state.pagination.page }),
+            ...(this.state.pagination.per_page !== 15 && { page: this.state.pagination.per_page }),
+            ...(this.state.order.sort && {
+                sort: this.state.order,
+                dir: this.state.order.dir
+            })
+        }
     }
 }
