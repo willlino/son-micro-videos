@@ -8,6 +8,7 @@ import { Genre, ListResponse } from "../../util/models";
 import DefaultTable, {
   makeActionStyles,
   TableColumn,
+  MuiDataTableRefComponent,
 } from "../../components/Table";
 import { FilterResetButton } from "../../components/Table/FilterResetButton";
 import { IconButton, MuiThemeProvider } from "@material-ui/core";
@@ -87,6 +88,8 @@ const Table = () => {
   const subscribed = useRef(true);
   const [data, setData] = useState<Genre[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
+  const tableRef = useRef() as React.MutableRefObject<MuiDataTableRefComponent>;
+
   const { 
     columns, 
     filterManager, 
@@ -99,12 +102,9 @@ const Table = () => {
     columns: columnsDefinition,
     debounceTime: debounceTime,
     rowsPerPage,
-    rowsPerPageOptions 
+    rowsPerPageOptions,
+    tableRef
   });
-
-  useEffect(() => {
-    filterManager.replaceHistory();
-  }, []);
 
   useEffect(() => {
     subscribed.current = true;
@@ -159,6 +159,7 @@ const Table = () => {
         data={data}
         loading={loading}
         debouncedSearchTime={debouncedSearchTime}
+        ref={tableRef}
         options={{
           serverSide: true,
           searchText: filterState.search as any,
@@ -168,7 +169,7 @@ const Table = () => {
           count: totalRecords,
           customToolbar: () => (
             <FilterResetButton
-              handleClick={() => dispatch(Creators.setReset())}
+              handleClick={() => filterManager.resetFilter() }
             />
           ),
           onSearchChange: (value: any) => filterManager.changeSearch(value),

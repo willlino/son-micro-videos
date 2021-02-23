@@ -1,5 +1,5 @@
 import { useState, useReducer, Dispatch } from "react";
-import reducer, { Creators, INITIAL_STATE } from "../store/filter";
+import reducer, { Creators } from "../store/filter";
 import { Actions as FilterActions, State as FilterState } from "../store/filter/types";
 import { MUIDataTableColumn } from "mui-datatables";
 import { Reducer } from "react";
@@ -11,6 +11,7 @@ import { Transform } from "stream";
 import * as yup from "../util/vendor/yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useEffect } from "react";
+import { MuiDataTableRefComponent } from "../components/Table";
 
 interface FilterManagerOptions {
     columns: MUIDataTableColumn[];
@@ -18,6 +19,8 @@ interface FilterManagerOptions {
     rowsPerPageOptions: number[];
     debounceTime: number;
     history: History;
+    tableRef: React.MutableRefObject<MuiDataTableRefComponent>;
+
 }
 
 interface UseFilterOptions extends Omit<FilterManagerOptions, 'history'> {
@@ -32,6 +35,7 @@ export default function useFilter(options: UseFilterOptions) {
     const [filterState, dispatch] = useReducer<Reducer<FilterState, FilterActions>>(reducer, INITIAL_STATE);
     const [debouncedFilterState] = useDebounce(filterState, options.debounceTime);
     filterManager.state = filterState;
+    filterManager.debouncedState = debouncedFilterState;
     filterManager.dispatch = dispatch;
 
     filterManager.applyOrderInColumns();
@@ -55,19 +59,27 @@ export default function useFilter(options: UseFilterOptions) {
 export class FilterManager {
     schema;
     state: FilterState = null as any;
+    debouncedState: FilterState = null as any;
     dispatch: Dispatch<FilterActions> = null as any;
     columns: MUIDataTableColumn[];
     rowsPerPage: number;
     rowsPerPageOptions: number[];
     history: History;
+    tableRef: React.MutableRefObject<MuiDataTableRefComponent>;
 
     constructor(options: FilterManagerOptions) {
-        const { columns, rowsPerPage, rowsPerPageOptions, history } = options;
+        const { columns, rowsPerPage, rowsPerPageOptions, history, tableRef } = options;
         this.columns = columns;
         this.rowsPerPage = rowsPerPage;
         this.rowsPerPageOptions = rowsPerPageOptions;
         this.history = history;
-        this.schema = this.createValidationSchema();
+        this.tableRef = tableRef;
+        this.createValidationSchema();
+    }
+
+    private resetTablePagination() {
+        this.tableRef.current.changeRowsPerPage(this.rowsPerPage);
+        this.tableRef.current.changePage(0);
     }
 
     changeSearch(value: any) {
@@ -88,7 +100,20 @@ export class FilterManager {
                 sort: changedColumn,
                 dir: direction.includes("desc") ? "desc" : "asc",
             })
-        )
+        );
+
+        this.resetTablePagination();
+    }
+
+    resetFilter() {
+        const INITIAL_STATE = {
+            ...this.schema.cast({}),
+            search: {value : null, update: true}
+        };
+        this.dispatch(Creators.setReset({
+            state: INITIAL_STATE
+        }));
+        this.resetTablePagination();
     }
 
     applyOrderInColumns() {
@@ -118,7 +143,7 @@ export class FilterManager {
         this.history.replace({
             pathname: this.history.location.pathname,
             search: '?' + new URLSearchParams(this.formatSearchParams() as any),
-            state: this.state
+            state: this.debouncedState
         })
     }
 
@@ -127,14 +152,13 @@ export class FilterManager {
             pathName: this.history.location.pathname,
             search: "?" + new URLSearchParams(this.formatSearchParams() as any),
             state: {
-                ...this.state,
-                search: this.clearSearchText(this.state.search)
+                ...this.debouncedState,
+                search: this.clearSearchText(this.debouncedState.search)
             }
         }
         const oldState = this.history.location.state;
-        const nextState = this.state;
+        const nextState = this.debouncedState;
         if (isEqual(nextState, oldState)){
-            console.log('is equal');
             return;
         }
 
@@ -146,11 +170,11 @@ export class FilterManager {
 
         return {
             ...(search && search !== '' && { search: search }),
-            ...(this.state.pagination.page !== 1 && { page: this.state.pagination.page }),
-            ...(this.state.pagination.per_page !== 15 && { page: this.state.pagination.per_page }),
-            ...(this.state.order.sort && {
-                sort: this.state.order,
-                dir: this.state.order.dir
+            ...(this.debouncedState.pagination.page !== 1 && { page: this.debouncedState.pagination.page }),
+            ...(this.debouncedState.pagination.per_page !== 15 && { page: this.debouncedState.pagination.per_page }),
+            ...(this.debouncedState.order.sort && {
+                sort: this.debouncedState.order,
+                dir: this.debouncedState.order.dir
             })
         }
     }
@@ -181,8 +205,7 @@ export class FilterManager {
                     .transform(value => isNaN(value) || parseInt(value) < 1 ? undefined : value)
                     .default(1),
                 per_page: yup.number()
-                    .oneOf(this.rowsPerPageOptions)
-                    .transform(value => isNaN(value) || parseInt(value) < 1 ? undefined : value)
+                    .transform(value => isNaN(value) || !this.rowsPerPageOptions.includes(parseInt(value))  ? undefined : value)
                     .default(this.rowsPerPage)
             }),
             order: yup.object().shape({
