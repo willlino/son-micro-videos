@@ -1,25 +1,24 @@
 import * as React from "react";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import categoryHttp from "../../util/http/category-http";
 import {
-  Chip,
-  Snackbar,
   MuiThemeProvider,
-  Theme,
-  IconButton
+  IconButton,
 } from "@material-ui/core";
 import { Link } from "react-router-dom";
-import EditIcon from '@material-ui/icons/Edit';
+import EditIcon from "@material-ui/icons/Edit";
 import format from "date-fns/format";
 import parseISO from "date-fns/parseISO";
 import { BadgeYes, BadgeNo } from "../../components/Badge";
 import DefaultTable, {
   makeActionStyles,
+  MuiDataTableRefComponent,
   TableColumn,
 } from "../../components/Table";
 import { ListResponse, Category } from "../../util/models";
 import { useSnackbar } from "notistack";
-
+import useFilter from "../../hooks/useFilter";
+import { FilterResetButton } from "../../components/Table/FilterResetButton";
 
 const columnsDefinition: TableColumn[] = [
   {
@@ -62,55 +61,120 @@ const columnsDefinition: TableColumn[] = [
     options: {
       sort: false,
       customBodyRender: (value, tableMeta) => {
-        return <IconButton 
-          color={'secondary'}
-          component={Link}
-          to={`/categories/${tableMeta.rowData[0]}/edit`}
-        >
-          <EditIcon fontSize={'inherit'}/>
-        </IconButton>;
+        return (
+          <IconButton
+            color={"secondary"}
+            component={Link}
+            to={`/categories/${tableMeta.rowData[0]}/edit`}
+          >
+            <EditIcon fontSize={"inherit"} />
+          </IconButton>
+        );
       },
     },
   },
 ];
 
-type Props = {};
+const debounceTime = 300;
+const debouncedSearchTime = 300;
+const rowsPerPage = 15;
+const rowsPerPageOptions = [15, 25, 50];
 
-const Table = (props: Props) => {
+const Table = () => {
   const snackbar = useSnackbar();
+  const subscribed = useRef(true);
   const [data, setData] = useState<Category[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
+  const tableRef = useRef() as React.MutableRefObject<MuiDataTableRefComponent>;
+
+  const {
+    columns,
+    filterManager,
+    filterState,
+    debouncedFilterState,
+    dispatch,
+    totalRecords,
+    setTotalRecords,
+  } = useFilter({
+    columns: columnsDefinition,
+    debounceTime: debounceTime,
+    rowsPerPage,
+    rowsPerPageOptions,
+    tableRef,
+  });
 
   useEffect(() => {
-    let isSubscribed = true;
-
-    (async () => {
-      setLoading(true);
-      try {
-        const { data } = await categoryHttp.list<ListResponse<Category>>();
-        if (isSubscribed) setData(data.data);
-      } catch (error) {
-        console.error(error);
-        snackbar.enqueueSnackbar("Não foi possível carregar as informações", {
-          variant: "error",
-        });
-      } finally {
-        setLoading(false);
-      }
-    })();
+    subscribed.current = true;
+    filterManager.pushHistory();
+    getData();
 
     return () => {
-      isSubscribed = false;
+      subscribed.current = false;
     };
-  }, []);
+  }, [
+    filterManager.clearSearchText(debouncedFilterState.search),
+    debouncedFilterState.pagination.page,
+    debouncedFilterState.pagination.per_page,
+    debouncedFilterState.order,
+  ]);
+
+  async function getData() {
+    setLoading(true);
+    try {
+      const { data } = await categoryHttp.list<ListResponse<Category>>({
+        queryParams: {
+          search: filterManager.clearSearchText(filterState.search),
+          page: filterState.pagination.page,
+          per_page: filterState.pagination.per_page,
+          sort: filterState.order.sort,
+          dir: filterState.order.dir,
+        },
+      });
+      if (subscribed.current) {
+        setData(data.data);
+        setTotalRecords(data.meta.total);
+      }
+    } catch (error) {
+      console.error(error);
+      if(categoryHttp.isCancelRequest(error)){
+        return;
+      }
+
+      snackbar.enqueueSnackbar("Não foi possível carregar as informações", {
+        variant: "error",
+      });
+    } finally {
+      setLoading(false);
+    }
+  }
 
   return (
     <MuiThemeProvider theme={makeActionStyles(columnsDefinition.length - 1)}>
       <DefaultTable
         title=""
-        columns={columnsDefinition}
+        columns={columns}
         data={data}
         loading={loading}
+        debouncedSearchTime={debouncedSearchTime}
+        ref={tableRef}
+        options={{
+          serverSide: true,
+          searchText: filterState.search as any,
+          page: filterState.pagination.page - 1,
+          rowsPerPage: filterState.pagination.per_page,
+          rowsPerPageOptions,
+          count: totalRecords,
+          customToolbar: () => (
+            <FilterResetButton
+              handleClick={() => filterManager.resetFilter() }
+            />
+          ),
+          onSearchChange: (value: any) => filterManager.changeSearch(value),
+          onChangePage: (page) => filterManager.changePage(page),
+          onChangeRowsPerPage: (perPage) => filterManager.changeRowsPerPage(perPage),
+          onColumnSortChange: (changedColumn: string, direction: string) =>
+            filterManager.changeColumnSort(changedColumn, direction)
+          }}
       />
     </MuiThemeProvider>
   );

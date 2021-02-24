@@ -14,7 +14,6 @@ import { IconButton, MuiThemeProvider } from "@material-ui/core";
 import { Link } from "react-router-dom";
 import EditIcon from "@material-ui/icons/Edit";
 import { useSnackbar } from "notistack";
-import { Creators } from "../../store/filter";
 import useFilter from "../../hooks/useFilter";
 
 const CastMemberTypeMap = {
@@ -73,14 +72,12 @@ const columnsDefinition: TableColumn[] = [
   },
 ];
 
-type Props = {};
-
 const debounceTime = 300;
 const debouncedSearchTime = 300;
 const rowsPerPage = 15;
 const rowsPerPageOptions = [15, 25, 50];
 
-const Table = (props: Props) => {
+const Table = () => {
   const snackbar = useSnackbar();
   const subscribed = useRef(true);
   const [data, setData] = useState<CastMember[]>([]);
@@ -153,7 +150,7 @@ const Table = (props: Props) => {
     <MuiThemeProvider theme={makeActionStyles(columnsDefinition.length - 1)}>
       <DefaultTable
         title=""
-        columns={columnsDefinition}
+        columns={columns}
         data={data}
         loading={loading}
         debouncedSearchTime={debouncedSearchTime}
