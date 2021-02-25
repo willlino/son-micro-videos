@@ -18,7 +18,13 @@ interface FilterManagerOptions {
     debounceTime: number;
     history: History;
     tableRef: React.MutableRefObject<MuiDataTableRefComponent>;
+    extraFilter?: ExtraFilter;
+}
 
+interface ExtraFilter {
+    getStateFromUrl: (queryParams: URLSearchParams) => any,
+    formatSearchParams: (debouncedState: FilterState) => any,
+    createValidationSchema: () => any
 }
 
 interface UseFilterOptions extends Omit<FilterManagerOptions, 'history'> {
@@ -64,6 +70,7 @@ export class FilterManager {
     rowsPerPageOptions: number[];
     history: History;
     tableRef: React.MutableRefObject<MuiDataTableRefComponent>;
+    extraFilter?: ExtraFilter;
 
     constructor(options: FilterManagerOptions) {
         const { columns, rowsPerPage, rowsPerPageOptions, history, tableRef } = options;
@@ -173,7 +180,10 @@ export class FilterManager {
             ...(this.debouncedState.order.sort && {
                 sort: this.debouncedState.order,
                 dir: this.debouncedState.order.dir
-            })
+            }),
+            ...(
+                this.extraFilter && this.extraFilter.formatSearchParams(this.debouncedState)
+            )
         }
     }
 
@@ -188,7 +198,12 @@ export class FilterManager {
             order: {
                 sort: queryParams.get('sort'),
                 dir: queryParams.get('dir')
-            }
+            },
+            ...(
+                this.extraFilter && {
+                    extraFilter: this.extraFilter.getStateFromUrl(queryParams)
+                }
+            )
         });
     }
 
@@ -227,7 +242,12 @@ export class FilterManager {
                         return columnsName.includes(value) ? value : undefined;
                     })
                     .default(null)
-            })
+            }),
+            ...(
+                this.extraFilter && {
+                    extraFilter: this.extraFilter.createValidationSchema()
+                }
+            )
         });
 
         return this.schema;
