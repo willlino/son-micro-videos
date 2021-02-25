@@ -12,7 +12,6 @@ import {
   useTheme
 } from "@material-ui/core";
 import DebouncedTableSearch from "./DebouncedTableSearch";
-import { de } from "date-fns/esm/locale";
 
 export interface TableColumn extends MUIDataTableColumn {
   width?: string;

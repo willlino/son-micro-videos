@@ -2,12 +2,7 @@ import * as React from "react";
 import {
   TextField,
   Checkbox,
-  Box,
-  Button,
-  makeStyles,
-  Theme,
-  FormControlLabel,
-  Grid,
+  FormControlLabel
 } from "@material-ui/core";
 import { useForm } from "react-hook-form";
 import categoryHttp from "../../util/http/category-http";

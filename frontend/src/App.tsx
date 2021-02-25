@@ -1,5 +1,4 @@
 import React from "react";
-import logo from "./logo.svg";
 import "./App.css";
 import { Box, CssBaseline, MuiThemeProvider } from "@material-ui/core";
 import { BrowserRouter } from "react-router-dom";
