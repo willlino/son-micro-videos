@@ -27,17 +27,24 @@ const columnsDefinition: TableColumn[] = [
     width: "30%",
     options: {
       sort: false,
+      filter: false,
     },
   },
   {
     name: "name",
     label: "Nome",
     width: "43%",
+    options: {
+      filter: false,
+    },
   },
   {
     name: "active",
     label: "Ativo?",
     options: {
+      filterOptions: {
+        names: ['Sim', 'Não']
+      },
       customBodyRender(value, tableMeta, updateValue) {
         return value ? <BadgeYes /> : <BadgeNo />;
       },
@@ -51,6 +58,7 @@ const columnsDefinition: TableColumn[] = [
       customBodyRender(value, tableMeta, updateValue) {
         return <span>{format(parseISO(value), "dd/MM/yyyy")}</span>;
       },
+      filter: false
     },
     width: "10%",
   },
@@ -60,6 +68,7 @@ const columnsDefinition: TableColumn[] = [
     width: "13%",
     options: {
       sort: false,
+      filter: false,
       customBodyRender: (value, tableMeta) => {
         return (
           <IconButton

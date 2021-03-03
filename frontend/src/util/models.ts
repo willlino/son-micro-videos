@@ -33,8 +33,13 @@ export interface Category extends Timestampable {
 export interface CastMember extends Timestampable {
     readonly id: string;
     name: string;
-    type: number; 
+    type: number;
 }
+
+export const CastMemberTypeMap = {
+    1: "Diretor",
+    2: "Ator",
+};
 
 export interface Genre extends Timestampable {
     readonly id: string;

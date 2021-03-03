@@ -3,7 +3,7 @@ import { useEffect, useState, useRef } from "react";
 import format from "date-fns/format";
 import parseISO from "date-fns/parseISO";
 import castMemberHttp from "../../util/http/cast-member-http";
-import { ListResponse, CastMember } from "../../util/models";
+import { ListResponse, CastMember, CastMemberTypeMap } from "../../util/models";
 import DefaultTable, {
   makeActionStyles,
   MuiDataTableRefComponent,
@@ -15,28 +15,34 @@ import { Link } from "react-router-dom";
 import EditIcon from "@material-ui/icons/Edit";
 import { useSnackbar } from "notistack";
 import useFilter from "../../hooks/useFilter";
+import * as yup from "../../util/vendor/yup";
+import { invert } from "lodash";
 
-const CastMemberTypeMap = {
-  1: "Diretor",
-  2: "Ator",
-};
+const castMemberNames = Object.values(CastMemberTypeMap);
 
 const columnsDefinition: TableColumn[] = [
   {
     name: "id",
     label: "ID",
     options: {
+      filter: false,
       sort: false,
     },
   },
   {
     name: "name",
     label: "Nome",
+    options: {
+      filter: false
+    },
   },
   {
     name: "type",
     label: "Tipo",
     options: {
+      filterOptions: {
+        names: castMemberNames,
+      },
       customBodyRender(value, tableMeta, updateValue) {
         return CastMemberTypeMap[value];
       },
@@ -46,9 +52,10 @@ const columnsDefinition: TableColumn[] = [
     name: "created_at",
     label: "Criado em",
     options: {
+      filter: false,
       customBodyRender(value, tableMeta, updateValue) {
         return <span>{format(parseISO(value), "dd/MM/yyyy")}</span>;
-      },
+      }
     },
   },
   {
@@ -57,6 +64,7 @@ const columnsDefinition: TableColumn[] = [
     width: "13%",
     options: {
       sort: false,
+      filter: false,
       customBodyRender: (value, tableMeta) => {
         return (
           <IconButton
@@ -97,7 +105,41 @@ const Table = () => {
     rowsPerPage,
     rowsPerPageOptions,
     tableRef,
+    extraFilter: {
+      createValidationSchema: () => {
+        return yup.object().shape({
+          type: yup
+            .string()
+            .nullable()
+            .transform((value) => {
+              return !value || !castMemberNames.includes(value)
+                ? undefined
+                : value;
+            })
+            .default(null),
+        });
+      },
+      formatSearchParams: (debouncedState) => {
+        return debouncedState.extraFilter
+          ? {
+              ...(debouncedState.extraFilter.type && {
+                type: debouncedState.extraFilter.type,
+              }),
+            }
+          : undefined;
+      },
+      getStateFromUrl: (queryParams) => {
+        return { type: queryParams.get("type") };
+      },
+    },
   });
+
+  const indexColumnType = columns.findIndex((c) => c.name === "type");
+  const columnType = columns[indexColumnType];
+  const typeFilterValue =
+    filterState.extraFilter && (filterState.extraFilter.type as never);
+  (columnType as any).filterList = typeFilterValue ? [typeFilterValue] : [];
+
 
   useEffect(() => {
     subscribed.current = true;
@@ -112,6 +154,7 @@ const Table = () => {
     debouncedFilterState.pagination.page,
     debouncedFilterState.pagination.per_page,
     debouncedFilterState.order,
+    JSON.stringify(debouncedFilterState.extraFilter)
   ]);
 
   async function getData() {
@@ -124,16 +167,20 @@ const Table = () => {
           per_page: filterState.pagination.per_page,
           sort: filterState.order.sort,
           dir: filterState.order.dir,
+          ...(
+            debouncedFilterState.extraFilter && debouncedFilterState.extraFilter.type &&
+            {type: invert(CastMemberTypeMap)[debouncedFilterState.extraFilter.type]}
+        )
         },
       });
-      if (subscribed.current){
+      if (subscribed.current) {
         setData(data.data);
         setTotalRecords(data.meta.total);
-      } 
+      }
     } catch (error) {
       console.error(error);
 
-      if(castMemberHttp.isCancelRequest(error)){
+      if (castMemberHttp.isCancelRequest(error)) {
         return;
       }
 
@@ -155,22 +202,30 @@ const Table = () => {
         debouncedSearchTime={debouncedSearchTime}
         ref={tableRef}
         options={{
-          serverSide:true,
+          serverSide: true,
           searchText: filterState.search as any,
           page: filterState.pagination.page - 1,
           rowsPerPage: filterState.pagination.per_page,
           rowsPerPageOptions,
           count: totalRecords,
+          onFilterChange: (column: any, filterList, type) => {
+            const columnIndex = columns.findIndex(c => c.name === column);
+            const columnValue = filterList[columnIndex].length ? filterList[columnIndex][0] : null;
+            filterManager.changeExtraFilter({
+              [column]: columnValue,
+            })
+          },
           customToolbar: () => (
             <FilterResetButton
-              handleClick={() => filterManager.resetFilter() }
+              handleClick={() => filterManager.resetFilter()}
             />
           ),
           onSearchChange: (value: any) => filterManager.changeSearch(value),
           onChangePage: (page) => filterManager.changePage(page),
-          onChangeRowsPerPage: (perPage) => filterManager.changeRowsPerPage(perPage),
+          onChangeRowsPerPage: (perPage) =>
+            filterManager.changeRowsPerPage(perPage),
           onColumnSortChange: (changedColumn: string, direction: string) =>
-            filterManager.changeColumnSort(changedColumn, direction)
+            filterManager.changeColumnSort(changedColumn, direction),
         }}
       />
     </MuiThemeProvider>

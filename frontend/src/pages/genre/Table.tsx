@@ -16,6 +16,7 @@ import { Link } from "react-router-dom";
 import EditIcon from "@material-ui/icons/Edit";
 import { useSnackbar } from "notistack";
 import useFilter from "../../hooks/useFilter";
+import * as yup from "../../util/vendor/yup";
 
 const columnsDefinition: TableColumn[] = [
   {
@@ -101,7 +102,33 @@ const Table = () => {
     debounceTime: debounceTime,
     rowsPerPage,
     rowsPerPageOptions,
-    tableRef
+    tableRef,
+    extraFilter: {
+      createValidationSchema: () => {
+        yup.object().shape({
+          categories: yup.mixed()
+            .nullable()
+            .transform(value => {
+              return !value || value === '' ? undefined : value.split(',');
+            })
+            .default(null)
+        })
+      },
+      formatSearchParams: (debouncedState) => {
+          return debouncedState.extraFilter ? {
+            ...(
+              debouncedState.extraFilter.categories && {
+                categories: debouncedState.extraFilter.categories.join(',')
+              }
+            )
+          } : undefined;
+      },
+      getStateFromUrl: (queryParams) => {
+        return {
+          categories: queryParams.get('categories')
+        };
+      }
+    }
   });
 
   useEffect(() => {
