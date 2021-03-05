@@ -117,7 +117,7 @@ const Table = () => {
     tableRef,
     extraFilter: {
       createValidationSchema: () => {
-        yup.object().shape({
+        return yup.object().shape({
           categories: yup
             .mixed()
             .nullable()
@@ -130,10 +130,10 @@ const Table = () => {
       formatSearchParams: (debouncedState) => {
         return debouncedState.extraFilter
           ? {
-              ...(debouncedState.extraFilter.categories && {
-                categories: debouncedState.extraFilter.categories.join(","),
-              }),
-            }
+              ...(debouncedState.extraFilter.categories && 
+                { categories: debouncedState.extraFilter.categories.join(",") }
+              ),
+            } 
           : undefined;
       },
       getStateFromUrl: (queryParams) => {
@@ -150,9 +150,7 @@ const Table = () => {
   const columnCategories = columns[indexColumnCategories];
   const categoriesFilterValue =
     filterState.extraFilter && filterState.extraFilter.categories;
-  (columnCategories.options as any).filterList = categoriesFilterValue
-    ? categoriesFilterValue
-    : [];
+  (columnCategories.options as any).filterList = categoriesFilterValue? [...categoriesFilterValue] : [];
 
   useEffect(() => {
     let isSubscribed = true;

@@ -73,12 +73,13 @@ export class FilterManager {
     extraFilter?: ExtraFilter;
 
     constructor(options: FilterManagerOptions) {
-        const { columns, rowsPerPage, rowsPerPageOptions, history, tableRef } = options;
+        const { columns, rowsPerPage, rowsPerPageOptions, history, tableRef, extraFilter } = options;
         this.columns = columns;
         this.rowsPerPage = rowsPerPage;
         this.rowsPerPageOptions = rowsPerPageOptions;
         this.history = history;
         this.tableRef = tableRef;
+        this.extraFilter = extraFilter;
         this.createValidationSchema();
     }
 
@@ -212,7 +213,6 @@ export class FilterManager {
     }
 
     private createValidationSchema() {
-
         this.schema = yup.object().shape({
             search: yup.string()
                 .transform(value => !value ? undefined : value)

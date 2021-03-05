@@ -33,7 +33,7 @@ const columnsDefinition: TableColumn[] = [
     name: "name",
     label: "Nome",
     options: {
-      filter: false
+      filter: false,
     },
   },
   {
@@ -55,7 +55,7 @@ const columnsDefinition: TableColumn[] = [
       filter: false,
       customBodyRender(value, tableMeta, updateValue) {
         return <span>{format(parseISO(value), "dd/MM/yyyy")}</span>;
-      }
+      },
     },
   },
   {
@@ -112,6 +112,7 @@ const Table = () => {
             .string()
             .nullable()
             .transform((value) => {
+              debugger;
               return !value || !castMemberNames.includes(value)
                 ? undefined
                 : value;
@@ -138,8 +139,7 @@ const Table = () => {
   const columnType = columns[indexColumnType];
   const typeFilterValue =
     filterState.extraFilter && (filterState.extraFilter.type as never);
-  (columnType as any).filterList = typeFilterValue ? [typeFilterValue] : [];
-
+  (columnType as any).options.filterList = typeFilterValue ? [typeFilterValue] : [];
 
   useEffect(() => {
     subscribed.current = true;
@@ -154,7 +154,7 @@ const Table = () => {
     debouncedFilterState.pagination.page,
     debouncedFilterState.pagination.per_page,
     debouncedFilterState.order,
-    JSON.stringify(debouncedFilterState.extraFilter)
+    JSON.stringify(debouncedFilterState.extraFilter),
   ]);
 
   async function getData() {
@@ -167,10 +167,12 @@ const Table = () => {
           per_page: filterState.pagination.per_page,
           sort: filterState.order.sort,
           dir: filterState.order.dir,
-          ...(
-            debouncedFilterState.extraFilter && debouncedFilterState.extraFilter.type &&
-            {type: invert(CastMemberTypeMap)[debouncedFilterState.extraFilter.type]}
-        )
+          ...(debouncedFilterState.extraFilter &&
+            debouncedFilterState.extraFilter.type && {
+              type: invert(CastMemberTypeMap)[
+                debouncedFilterState.extraFilter.type
+              ],
+            }),
         },
       });
       if (subscribed.current) {
@@ -209,11 +211,13 @@ const Table = () => {
           rowsPerPageOptions,
           count: totalRecords,
           onFilterChange: (column: any, filterList, type) => {
-            const columnIndex = columns.findIndex(c => c.name === column);
-            const columnValue = filterList[columnIndex].length ? filterList[columnIndex][0] : null;
+            const columnIndex = columns.findIndex((c) => c.name === column);
+            const columnValue = filterList[columnIndex].length
+              ? filterList[columnIndex][0]
+              : null;
             filterManager.changeExtraFilter({
               [column]: columnValue,
-            })
+            });
           },
           customToolbar: () => (
             <FilterResetButton
