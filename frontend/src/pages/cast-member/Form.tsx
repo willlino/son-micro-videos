@@ -17,6 +17,7 @@ import { useSnackbar } from "notistack";
 import { FormHelperText } from "@material-ui/core";
 import { CastMember } from "../../util/models";
 import SubmitActions from "../../components/SubmitActions";
+import { DefaultForm } from "../../components/DefaultForm";
 
 const validationSchema = yup.object().shape({
   name: yup.string().label("Nome").required().max(255),
@@ -107,7 +108,7 @@ export const Form = () => {
   }
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)}>
+    <DefaultForm GridItemProps={{xs:12}} onSubmit={handleSubmit(onSubmit)} >
       <TextField
         name="name"
         label="Nome"
@@ -159,6 +160,6 @@ export const Form = () => {
           if (isValid) onSubmit(getValues(), null);
         }}
       ></SubmitActions>
-    </form>
+    </DefaultForm>
   );
 };

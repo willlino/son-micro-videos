@@ -101,7 +101,7 @@ export const Form = () => {
   }
 
   return (
-    <DefaultForm GridItemProps={{xs:12, md:6}} onSubmit={handleSubmit(onSubmit)} >
+    <DefaultForm GridItemProps={{xs:12}} onSubmit={handleSubmit(onSubmit)} >
           <TextField
             name="name"
             label="Nome"
