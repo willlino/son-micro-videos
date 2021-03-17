@@ -5,17 +5,20 @@ import {
   TextField,
   Typography,
   Grid,
+  useTheme,
+  useMediaQuery,
 } from "@material-ui/core";
 import { useForm } from "react-hook-form";
 import { useEffect, useState } from "react";
-import videoHttp from "../../util/http/category-http";
-import * as yup from "../../util/vendor/yup";
+import videoHttp from "../../../util/http/category-http";
+import * as yup from "../../../util/vendor/yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useSnackbar } from "notistack";
 import { useHistory, useParams } from "react-router-dom";
-import { Video } from "../../util/models";
-import SubmitActions from "../../components/SubmitActions";
-import { DefaultForm } from "../../components/DefaultForm";
+import { Video } from "../../../util/models";
+import SubmitActions from "../../../components/SubmitActions";
+import { DefaultForm } from "../../../components/DefaultForm";
+import { RatingField } from "./RatingField";
 
 const validationSchema = yup.object().shape({
   title: yup.string().label("Título").required().max(255),
@@ -44,6 +47,12 @@ export const Form = () => {
   const { id } = useParams();
   const [video, setVideo] = useState<Video | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
+  const theme = useTheme();
+  const isGreaterThanMd = useMediaQuery(theme.breakpoints.up('md'));
+
+  useEffect(() => {
+    ["rating", "opened"].forEach((name) => register({ name }));
+  }, [register]);
 
   useEffect(() => {
     if (!id) {
@@ -172,7 +181,15 @@ export const Form = () => {
           Gêneros e Categorias
         </Grid>
         <Grid item xs={12} md={6}>
-          Classificação
+          <RatingField 
+            value={watch("rating")}
+            setValue={(value) => setValue("rating", value, {shouldValidate: true, shouldDirty: true})}
+            error={errors.rating}
+            disabled={loading}
+            FormControlProps={{
+              margin: isGreaterThanMd ? 'none' : 'normal'
+            }}
+          />
           <br />
           Uploads
           <br />
@@ -195,13 +212,13 @@ export const Form = () => {
           />
         </Grid>
         <Grid item xs={12}>
-        <SubmitActions
-          disabledButtons={loading}
-          handleSave={async () => {
-            let isValid: boolean = await trigger();
-            if (isValid) onSubmit(getValues(), null);
-          }}
-        ></SubmitActions>
+          <SubmitActions
+            disabledButtons={loading}
+            handleSave={async () => {
+              let isValid: boolean = await trigger();
+              if (isValid) onSubmit(getValues(), null);
+            }}
+          ></SubmitActions>
         </Grid>
       </Grid>
     </DefaultForm>
