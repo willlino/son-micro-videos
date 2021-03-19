@@ -18,6 +18,7 @@ import { useHistory, useParams } from "react-router-dom";
 import { Video } from "../../../util/models";
 import SubmitActions from "../../../components/SubmitActions";
 import { DefaultForm } from "../../../components/DefaultForm";
+import InputFile from "../../../components/InputFile";
 import { RatingField } from "./RatingField";
 
 const validationSchema = yup.object().shape({
@@ -48,7 +49,7 @@ export const Form = () => {
   const [video, setVideo] = useState<Video | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const theme = useTheme();
-  const isGreaterThanMd = useMediaQuery(theme.breakpoints.up('md'));
+  const isGreaterThanMd = useMediaQuery(theme.breakpoints.up("md"));
 
   useEffect(() => {
     ["rating", "opened"].forEach((name) => register({ name }));
@@ -181,17 +182,23 @@ export const Form = () => {
           Gêneros e Categorias
         </Grid>
         <Grid item xs={12} md={6}>
-          <RatingField 
+          <RatingField
             value={watch("rating")}
-            setValue={(value) => setValue("rating", value, {shouldValidate: true, shouldDirty: true})}
+            setValue={(value) =>
+              setValue("rating", value, {
+                shouldValidate: true,
+                shouldDirty: true,
+              })
+            }
             error={errors.rating}
             disabled={loading}
             FormControlProps={{
-              margin: isGreaterThanMd ? 'none' : 'normal'
+              margin: isGreaterThanMd ? "none" : "normal",
             }}
           />
           <br />
           Uploads
+          <InputFile />
           <br />
           <FormControlLabel
             control={
