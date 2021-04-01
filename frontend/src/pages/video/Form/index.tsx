@@ -7,6 +7,11 @@ import {
   Grid,
   useTheme,
   useMediaQuery,
+  Button,
+  Card,
+  CardContent,
+  Theme,
+  makeStyles
 } from "@material-ui/core";
 import { useForm } from "react-hook-form";
 import { useEffect, useState } from "react";
@@ -15,11 +20,19 @@ import * as yup from "../../../util/vendor/yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useSnackbar } from "notistack";
 import { useHistory, useParams } from "react-router-dom";
-import { Video } from "../../../util/models";
+import { Video, VideoFileFieldsMap } from "../../../util/models";
 import SubmitActions from "../../../components/SubmitActions";
 import { DefaultForm } from "../../../components/DefaultForm";
-import InputFile from "../../../components/InputFile";
 import { RatingField } from "./RatingField";
+import { UploadField } from "./UploadField";
+
+const useStyles = makeStyles((theme: Theme) =>({
+  cardUpload: {
+    borderRadius: "4px",
+    backgroundColor: "#f5f5f5",
+    margin: theme.spacing(2, 0)
+  }
+}));
 
 const validationSchema = yup.object().shape({
   title: yup.string().label("Título").required().max(255),
@@ -28,6 +41,8 @@ const validationSchema = yup.object().shape({
   duration: yup.number().label("Duração").required().min(1),
   rating: yup.string().label("Classificação").required(),
 });
+
+const fileFields = Object.keys(VideoFileFieldsMap);
 
 export const Form = () => {
   const {
@@ -45,6 +60,7 @@ export const Form = () => {
 
   const snackbar = useSnackbar();
   const history = useHistory();
+  const classes = useStyles();
   const { id } = useParams();
   const [video, setVideo] = useState<Video | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
@@ -52,7 +68,7 @@ export const Form = () => {
   const isGreaterThanMd = useMediaQuery(theme.breakpoints.up("md"));
 
   useEffect(() => {
-    ["rating", "opened"].forEach((name) => register({ name }));
+    ["rating", "opened", ...fileFields].forEach((name) => register({ name }));
   }, [register]);
 
   useEffect(() => {
@@ -197,8 +213,40 @@ export const Form = () => {
             }}
           />
           <br />
-          Uploads
-          <InputFile />
+          <Card className={classes.cardUpload}>
+            <CardContent>
+              <Typography color="primary" variant="h6">
+                Imagens
+              </Typography>
+              <UploadField
+                accept={"image/*"}
+                label={"Thumb"}
+                setValue={(value) => setValue("thumb_file", value)}
+              />
+              <UploadField
+                accept={"image/*"}
+                label={"Banner"}
+                setValue={(value) => setValue("banner_file", value)}
+              />
+            </CardContent>
+          </Card>
+          <Card className={classes.cardUpload}>
+            <CardContent>
+              <Typography color="primary" variant="h6">
+                Vídeos
+              </Typography>
+              <UploadField
+                accept={"video/mp4"}
+                label={"Trailer"}
+                setValue={(value) => setValue("trailer_file", value)}
+              />
+              <UploadField
+                accept={"video/mp4"}
+                label={"Principal"}
+                setValue={(value) => setValue("video_file", value)}
+              />
+            </CardContent>
+          </Card>
           <br />
           <FormControlLabel
             control={
