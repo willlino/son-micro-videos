@@ -23,10 +23,11 @@ import { useHistory, useParams } from "react-router-dom";
 import { Video, VideoFileFieldsMap } from "../../../util/models";
 import SubmitActions from "../../../components/SubmitActions";
 import { DefaultForm } from "../../../components/DefaultForm";
+import AsyncAutocomplete from "../../../components/AsyncAutocomplete";
 import { RatingField } from "./RatingField";
 import { UploadField } from "./UploadField";
 
-const useStyles = makeStyles((theme: Theme) =>({
+const useStyles = makeStyles((theme: Theme) =>({ 
   cardUpload: {
     borderRadius: "4px",
     backgroundColor: "#f5f5f5",
@@ -195,6 +196,7 @@ export const Form = () => {
           </Grid>
           Elenco
           <br />
+          <AsyncAutocomplete/>
           Gêneros e Categorias
         </Grid>
         <Grid item xs={12} md={6}>
