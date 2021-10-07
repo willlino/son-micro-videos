@@ -9,7 +9,6 @@ class httpResource {
     }
 
     list<T = any>(options?: { queryParams? }) : Promise<AxiosResponse<T>>{
-        
         if(this.cancelList){
             this.cancelList.cancel('list cancelled');
         }
